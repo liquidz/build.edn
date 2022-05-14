@@ -113,15 +113,20 @@
                     :installer :local
                     :pom-file (b/pom-path {:lib lib :class-dir class-dir})})))
 
+(defn print-version
+  [arg]
+  (let [config (gen-config arg)]
+    (println (str "::set-output name=version::" (:version config)))))
+
 (defn deploy
   [arg]
   (assert (and (System/getenv "CLOJARS_USERNAME")
                (System/getenv "CLOJARS_PASSWORD")))
-  (let [{:as config :keys [lib version class-dir jar-file]} (gen-config arg)
+  (let [{:as config :keys [lib class-dir jar-file]} (gen-config arg)
         arg (assoc arg :config config)]
     (validate-config! config)
     (jar arg)
     (deploy/deploy {:artifact jar-file
                     :installer :remote
                     :pom-file (b/pom-path {:lib lib :class-dir class-dir})})
-    (println (str "::set-output name=version::" version))))
+    (print-version arg)))
