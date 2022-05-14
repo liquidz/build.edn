@@ -3,7 +3,8 @@
     [clojure.tools.build.api :as b]
     [deps-deploy.deps-deploy :as deploy]
     [malli.core :as m]
-    [malli.error :as me]))
+    [malli.error :as me]
+    [malli.util :as mu]))
 
 (def ^:private ?scm
   [:map
@@ -18,15 +19,21 @@
    [:source-dir {:optional true} string?]
    [:class-dir {:optional true} string?]
    [:jar-file {:optional true} string?]
-   [:uber-file {:optional true} string?]
-   [:main {:optional true} symbol?]
    [:scm {:optional true} ?scm]])
 
+(def ^:private ?uber-build-config
+  (mu/merge ?build-config
+            [:map
+             [:uber-file string?]
+             [:main {:optional true} symbol?]]))
+
 (defn- validate-config!
-  [config]
-  (when-let [e (m/explain ?build-config config)]
-    (let [m (me/humanize e)]
-      (throw (ex-info (str "Invalid config: " m) m)))))
+  ([config]
+   (validate-config! ?build-config config))
+  ([?schema config]
+   (when-let [e (m/explain ?schema config)]
+     (let [m (me/humanize e)]
+       (throw (ex-info (str "Invalid config: " m) m))))))
 
 (defn- get-defaults
   [config]
@@ -42,10 +49,8 @@
             config (update arg :version #(format % git-count))
             config (cond-> config
                      (contains? config :scm)
-                     (assoc-in [:scm :tag] (:version config)))
-            config (merge (get-defaults config) config)]
-        (validate-config! config)
-        config)))
+                     (assoc-in [:scm :tag] (:version config)))]
+        (merge (get-defaults config) config))))
 
 (defn- get-basis
   [arg]
@@ -61,6 +66,7 @@
   [arg]
   (let [config (gen-config arg)
         basis (get-basis arg)]
+    (validate-config! config)
     (-> config
         (select-keys [:lib :version :class-dir :scm])
         (assoc :basis basis
@@ -72,6 +78,7 @@
   (let [{:as config :keys [class-dir jar-file]} (gen-config arg)
         basis (get-basis arg)
         arg (assoc arg :config config :basis basis)]
+    (validate-config! config)
     (pom arg)
     (b/copy-dir {:src-dirs (get-src-dirs config basis)
                  :target-dir class-dir})
@@ -84,6 +91,7 @@
         basis (get-basis arg)
         src-dirs (get-src-dirs config basis)
         arg (assoc arg :config config :basis basis)]
+    (validate-config! ?uber-build-config config)
     (pom arg)
     (b/copy-dir {:src-dirs src-dirs
                  :target-dir class-dir})
@@ -99,6 +107,7 @@
   [arg]
   (let [{:as config :keys [lib class-dir jar-file]} (gen-config arg)
         arg (assoc arg :config config)]
+    (validate-config! config)
     (jar arg)
     (deploy/deploy {:artifact jar-file
                     :installer :local
@@ -110,6 +119,7 @@
                (System/getenv "CLOJARS_PASSWORD")))
   (let [{:as config :keys [lib version class-dir jar-file]} (gen-config arg)
         arg (assoc arg :config config)]
+    (validate-config! config)
     (jar arg)
     (deploy/deploy {:artifact jar-file
                     :installer :remote
