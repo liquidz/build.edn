@@ -25,7 +25,7 @@
   (mu/merge ?build-config
             [:map
              [:uber-file string?]
-             [:main {:optional true} symbol?]]))
+             [:main symbol?]]))
 
 (defn- validate-config!
   ([config]
