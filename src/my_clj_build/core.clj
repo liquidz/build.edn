@@ -15,7 +15,8 @@
 (def ^:private ?build-config
   [:map
    [:lib qualified-symbol?]
-   [:version string?]
+   [:version-format string?]
+   [:version {:optional true} string?]
    [:source-dir {:optional true} string?]
    [:class-dir {:optional true} string?]
    [:jar-file {:optional true} string?]
@@ -26,6 +27,13 @@
             [:map
              [:uber-file string?]
              [:main symbol?]]))
+
+(defn- render
+  [data format-string]
+  (reduce (fn [accm [k v]]
+            (str/replace accm (str "{{" (name k) "}}") v))
+          format-string
+          data))
 
 (defn- validate-config!
   ([config]
@@ -45,8 +53,10 @@
 (defn- gen-config
   [arg]
   (or (:config arg)
-      (let [git-count (or (b/git-count-revs nil) 0)
-            config (update arg :version #(format % git-count))
+      (let [render-data {:commit-count (or (b/git-count-revs nil) 0)}
+            config (cond-> arg
+                     (not (contains? arg :version))
+                     (assoc :version (render render-data (:version-format arg))))
             config (cond-> config
                      (contains? config :scm)
                      (assoc-in [:scm :tag] (:version config)))]
