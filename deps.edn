@@ -1,4 +1,15 @@
 {:paths ["src"]
  :deps {io.github.clojure/tools.build {:git/tag "v0.8.1" :git/sha "7d40500"}
         metosin/malli {:mvn/version "0.8.4"}
-        slipset/deps-deploy {:mvn/version "0.2.0"}}}
+        slipset/deps-deploy {:mvn/version "0.2.0"}}
+ :aliases {:dev {:extra-paths ["test"]
+                 :extra-deps {lambdaisland/kaocha {:mvn/version "1.66.1034"}}}
+
+           :test {:main-opts ["-m" "kaocha.runner"]}
+
+           :outdated {:extra-deps {com.github.liquidz/antq {:mvn/version "RELEASE"}
+                                   org.slf4j/slf4j-nop {:mvn/version "RELEASE"}}
+                      :main-opts ["-m" "antq.core"]}
+
+           :build {:deps {sut/sut {:local/root "."}}
+                   :ns-default my-clj-build.main}}}
