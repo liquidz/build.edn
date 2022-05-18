@@ -1,4 +1,4 @@
-(ns my-clj-build.core
+(ns build-edn.core
   (:require
     [clojure.string :as str]
     [clojure.tools.build.api :as b]

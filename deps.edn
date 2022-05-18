@@ -12,4 +12,4 @@
                       :main-opts ["-m" "antq.core"]}
 
            :build {:deps {sut/sut {:local/root "."}}
-                   :ns-default my-clj-build.main}}}
+                   :ns-default build-edn.main}}}
