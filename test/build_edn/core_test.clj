@@ -1,8 +1,8 @@
 (ns build-edn.core-test
   (:require
-    [build-edn.core :as sut]
-    [clojure.test :as t]
-    [clojure.tools.build.api :as b]))
+   [build-edn.core :as sut]
+   [clojure.test :as t]
+   [clojure.tools.build.api :as b]))
 
 (t/deftest config-test
   (with-redefs [b/git-count-revs (constantly "3")]

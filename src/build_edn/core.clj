@@ -1,14 +1,14 @@
 (ns build-edn.core
   (:require
-    [clojure.string :as str]
-    [clojure.tools.build.api :as b]
-    [deps-deploy.deps-deploy :as deploy]
-    [malli.core :as m]
-    [malli.error :as me]
-    [malli.util :as mu])
+   [clojure.string :as str]
+   [clojure.tools.build.api :as b]
+   [deps-deploy.deps-deploy :as deploy]
+   [malli.core :as m]
+   [malli.error :as me]
+   [malli.util :as mu])
   (:import
-    java.time.ZonedDateTime
-    java.time.format.DateTimeFormatter))
+   java.time.ZonedDateTime
+   java.time.format.DateTimeFormatter))
 
 (def ^:private ?scm
   [:map
@@ -83,7 +83,8 @@
       (-> (select-keys arg [:aliases])
           (b/create-basis))))
 
-(defn- get-src-dirs [config basis]
+(defn- get-src-dirs
+  [config basis]
   (or (:src-dirs config)
       (:paths basis)))
 
