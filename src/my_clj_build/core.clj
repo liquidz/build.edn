@@ -1,10 +1,14 @@
 (ns my-clj-build.core
   (:require
+    [clojure.string :as str]
     [clojure.tools.build.api :as b]
     [deps-deploy.deps-deploy :as deploy]
     [malli.core :as m]
     [malli.error :as me]
-    [malli.util :as mu]))
+    [malli.util :as mu])
+  (:import
+    java.time.ZonedDateTime
+    java.time.format.DateTimeFormatter))
 
 (def ^:private ?scm
   [:map
@@ -28,6 +32,13 @@
              [:uber-file string?]
              [:main symbol?]]))
 
+(def ^:private ?changelog-build-config
+  (mu/merge ?build-config
+            [:map
+             [:changelog-file string?]
+             [:unreleased-title string?]
+             [:changelog-title-format string?]]))
+
 (defn- render
   [data format-string]
   (reduce (fn [accm [k v]]
@@ -48,7 +59,11 @@
   (let [lib-name (name (:lib config))]
     {:class-dir "target/classes"
      :jar-file (format "target/%s.jar" lib-name)
-     :uber-file (format "target/%s-standalone.jar" lib-name)}))
+     :uber-file (format "target/%s-standalone.jar" lib-name)
+     :changelog-file "CHANGELOG.md"
+     :unreleased-title "Unreleased"
+     :changelog-title-format "## {{version}} ({{date}})"
+     :github-action? false}))
 
 (defn- gen-config
   [arg]
@@ -71,6 +86,11 @@
 (defn- get-src-dirs [config basis]
   (or (:src-dirs config)
       (:paths basis)))
+
+(defn- set-gha-output
+  [config k v]
+  (when (:github-action? config)
+    (println (str "::set-output name=" k "::" v))))
 
 (defn pom
   [arg]
@@ -140,3 +160,19 @@
                     :installer :remote
                     :pom-file (b/pom-path {:lib lib :class-dir class-dir})})
     (print-version arg)))
+
+(defn tag-changelog
+  [arg]
+  (let [{:as config :keys [version changelog-file unreleased-title changelog-title-format]} (gen-config arg)
+        _ (validate-config! ?changelog-build-config config)
+        render-data {:version version
+                     :date (.format (ZonedDateTime/now) DateTimeFormatter/ISO_LOCAL_DATE)}
+        title (render render-data changelog-title-format)]
+    (->> (slurp changelog-file)
+         (str/split-lines)
+         (mapcat #(if (str/includes? % unreleased-title)
+                    [% "" title]
+                    [%]))
+         (str/join "\n")
+         (spit changelog-file))
+    (set-gha-output config "version" version)))
