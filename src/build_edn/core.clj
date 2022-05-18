@@ -19,8 +19,7 @@
 (def ^:private ?build-config
   [:map
    [:lib qualified-symbol?]
-   [:version-format string?]
-   [:version {:optional true} string?]
+   [:version string?]
    [:source-dir {:optional true} string?]
    [:class-dir {:optional true} string?]
    [:jar-file {:optional true} string?]
@@ -71,8 +70,8 @@
   (or (:config arg)
       (let [render-data {:commit-count (or (b/git-count-revs nil) 0)}
             config (cond-> arg
-                     (not (contains? arg :version))
-                     (assoc :version (render render-data (:version-format arg))))
+                     (str/includes? (:version arg) "{{")
+                     (update :version #(render render-data %)))
             config (cond-> config
                      (contains? config :scm)
                      (assoc-in [:scm :tag] (:version config)))]
