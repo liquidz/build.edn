@@ -37,7 +37,7 @@
             [:map
              [:changelog-file string?]
              [:unreleased-title string?]
-             [:changelog-title-format string?]]))
+             [:changelog-title string?]]))
 
 (defn- render
   [data format-string]
@@ -62,7 +62,7 @@
      :uber-file (format "target/%s-standalone.jar" lib-name)
      :changelog-file "CHANGELOG.md"
      :unreleased-title "Unreleased"
-     :changelog-title-format "## {{version}} ({{date}})"
+     :changelog-title "## {{version}} ({{date}})"
      :github-action? false}))
 
 (defn- gen-config
@@ -162,11 +162,11 @@
 
 (defn tag-changelog
   [arg]
-  (let [{:as config :keys [version changelog-file unreleased-title changelog-title-format]} (gen-config arg)
+  (let [{:as config :keys [version changelog-file unreleased-title changelog-title]} (gen-config arg)
         _ (validate-config! ?changelog-build-config config)
         render-data {:version version
                      :date (.format (ZonedDateTime/now) DateTimeFormatter/ISO_LOCAL_DATE)}
-        title (render render-data changelog-title-format)]
+        title (render render-data changelog-title)]
     (->> (slurp changelog-file)
          (str/split-lines)
          (mapcat #(if (str/includes? % unreleased-title)
