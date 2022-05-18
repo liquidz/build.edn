@@ -24,7 +24,8 @@
    [:source-dir {:optional true} string?]
    [:class-dir {:optional true} string?]
    [:jar-file {:optional true} string?]
-   [:scm {:optional true} ?scm]])
+   [:scm {:optional true} ?scm]
+   [:github-action? {:optional true} boolean?]])
 
 (def ^:private ?uber-build-config
   (mu/merge ?build-config
@@ -101,7 +102,8 @@
         (select-keys [:lib :version :class-dir :scm])
         (assoc :basis basis
                :src-dirs (get-src-dirs config basis))
-        (b/write-pom))))
+        (b/write-pom))
+    (set-gha-output config "pom" (b/pom-path config))))
 
 (defn jar
   [arg]
@@ -113,7 +115,8 @@
     (b/copy-dir {:src-dirs (get-src-dirs config basis)
                  :target-dir class-dir})
     (b/jar {:class-dir class-dir
-            :jar-file jar-file})))
+            :jar-file jar-file})
+    (set-gha-output config "jar" jar-file)))
 
 (defn uberjar
   [arg]
@@ -131,35 +134,32 @@
     (b/uber {:class-dir class-dir
              :uber-file uber-file
              :basis basis
-             :main main})))
+             :main main})
+    (set-gha-output config "jar" uber-file)))
 
 (defn install
   [arg]
-  (let [{:as config :keys [lib class-dir jar-file]} (gen-config arg)
+  (let [{:as config :keys [lib version class-dir jar-file]} (gen-config arg)
         arg (assoc arg :config config)]
     (validate-config! config)
     (jar arg)
     (deploy/deploy {:artifact jar-file
                     :installer :local
-                    :pom-file (b/pom-path {:lib lib :class-dir class-dir})})))
-
-(defn print-version
-  [arg]
-  (let [config (gen-config arg)]
-    (println (str "::set-output name=version::" (:version config)))))
+                    :pom-file (b/pom-path {:lib lib :class-dir class-dir})})
+    (set-gha-output config "version" version)))
 
 (defn deploy
   [arg]
   (assert (and (System/getenv "CLOJARS_USERNAME")
                (System/getenv "CLOJARS_PASSWORD")))
-  (let [{:as config :keys [lib class-dir jar-file]} (gen-config arg)
+  (let [{:as config :keys [lib version class-dir jar-file]} (gen-config arg)
         arg (assoc arg :config config)]
     (validate-config! config)
     (jar arg)
     (deploy/deploy {:artifact jar-file
                     :installer :remote
                     :pom-file (b/pom-path {:lib lib :class-dir class-dir})})
-    (print-version arg)))
+    (set-gha-output config "version" version)))
 
 (defn tag-changelog
   [arg]
