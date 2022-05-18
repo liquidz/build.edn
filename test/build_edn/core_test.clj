@@ -8,7 +8,7 @@
   (with-redefs [b/git-count-revs (constantly "3")]
     (t/is (= {:lib 'foo/bar
               :version "1.2.3"
-              :changelog-title-format "## {{version}} ({{date}})"
+              :changelog-title "## {{version}} ({{date}})"
               :jar-file "target/bar.jar"
               :uber-file "target/bar-standalone.jar"
               :class-dir "target/classes"
