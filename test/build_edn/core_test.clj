@@ -8,13 +8,13 @@
   (with-redefs [b/git-count-revs (constantly "3")]
     (t/is (= {:lib 'foo/bar
               :version "1.2.3"
-              :changelog-title "## {{version}} ({{date}})"
+              :changelog-title "## {{version}} ({{yyyy-mm-dd}})"
               :jar-file "target/bar.jar"
               :uber-file "target/bar-standalone.jar"
               :class-dir "target/classes"
               :changelog-file "CHANGELOG.md"
               :unreleased-title "Unreleased"
-              :github-action? false}
+              :github-actions? false}
              (#'sut/gen-config {:lib 'foo/bar
                                 :version "1.2.{{commit-count}}"})))
 
