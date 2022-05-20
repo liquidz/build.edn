@@ -9,21 +9,32 @@
       (edn/read-string)))
 
 (defn pom
-  [_]
-  (core/pom (load-config)))
+  [m]
+  (-> (load-config)
+      (merge m)
+      (core/pom)))
 
 (defn jar
-  [_]
-  (core/jar (load-config)))
+  [m]
+  (-> (load-config)
+      (merge m)
+      (core/jar)))
 
 (defn uberjar
-  [_]
-  (core/uberjar (load-config)))
+  [m]
+  (-> (load-config)
+      (merge m)
+      (core/uberjar)))
 
 (defn install
-  [_]
-  (core/install (load-config)))
+  [m]
+  (println "FIXME" (pr-str m))
+  (-> (load-config)
+      (merge m)
+      (core/install)))
 
 (defn tag-changelog
-  [_]
-  (core/tag-changelog (load-config)))
+  [m]
+  (-> (load-config)
+      (merge m)
+      (core/tag-changelog)))
