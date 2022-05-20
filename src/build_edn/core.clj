@@ -62,7 +62,7 @@
      :uber-file (format "target/%s-standalone.jar" lib-name)
      :changelog-file "CHANGELOG.md"
      :unreleased-title "Unreleased"
-     :changelog-title "## {{version}} ({{date}})"
+     :changelog-title "## {{version}} ({{yyyy-mm-dd}})"
      :github-actions? false}))
 
 (defn- gen-config
@@ -166,7 +166,7 @@
   (let [{:as config :keys [version changelog-file unreleased-title changelog-title]} (gen-config arg)
         _ (validate-config! ?changelog-build-config config)
         render-data {:version version
-                     :date (.format (ZonedDateTime/now) DateTimeFormatter/ISO_LOCAL_DATE)}
+                     :yyyy-mm-dd (.format (ZonedDateTime/now) DateTimeFormatter/ISO_LOCAL_DATE)}
         title (render render-data changelog-title)]
     (->> (slurp changelog-file)
          (str/split-lines)
