@@ -1,0 +1,257 @@
+= build.edn
+:toc:
+:toc-placement: preamble
+:toclevels: 2
+
+// Need some preamble to get TOC:
+{empty}
+
+Easy to build(jar, uberjar, install and deploy) your libraries.
+
+== Getting started
+
+build.edn make you buildable your libraries only preparing `build.edn` file for the simple usage.
+
+* build.edn
+** {blank}
++
+[source,clojure]
+----
+{:lib com.github.YOUR-ACCOUNT/AWESOME-LIB
+ :verion "0.1.{{commit-count}}"}
+----
+
+* deps.edn
+** {blank}
++
+[source,clojure]
+----
+{:aliases
+ {:build {:deps {com.github.liquidz/build.edn {:mvn/version "FIXME"}}
+          :ns-default build-edn.main}}}
+----
+
+* use by clojure cli
+** {blank}
++
+[source,bash]
+----
+# Install lib to your local maven repo
+$ clojure -T:build install
+
+# Deploy to clojars.org
+# CLOJARS_USERNAME and CLOJARS_PASSWORD environmental variables are required
+$ clojur -T:build deploy
+----
+
+== API
+=== build-edn.main
+
+`build-edn.main` namespace provides following functions:
+
+|====
+| Function | Description
+
+| pom
+| Generate pom.xml
+
+| jar
+| Generate JAR file
+
+| uberjar
+| Generate standalone JAR file
+
+| install
+| Install to local Maven repository
+
+| deploy
+| Deploy to https://clojars.org
+
+| tag-changelog
+| Append title to your CHANGELOG
+
+|====
+
+=== Manual usage
+
+`build-edn.main` namespace is just a wrapper for `build-edn.core`.
+So if you want to tune the build process a bit more, you can use `build-edn.core` name directly.
+
+* deps.edn
+** {blank}
++
+[source,clojure]
+----
+{:aliases
+ {:build {:deps {com.github.liquidz/build.edn {:mvn/version "FIXME"}}
+          :ns-default build}}}
+----
+* build.clj
+** {blank}
++
+[source,clojure]
+----
+(ns build
+  (:require
+   [build-edn.core :as build-edn]))
+
+(def ^:private config
+  {:lib 'com.github.YOUR-ACCOUNT/AWESOME-LIB
+   :verion "0.1.{{commit-count}}"})
+
+(defn deploy
+  [_]
+  ;; Deploy with past name for compatibility.
+  (build-edn/deploy (assoc config :lib 'AWESOME-LIB/AWESOME-LIB))
+  (build-edn/deploy config))
+----
+
+
+== Configuration
+
+=== build.edn
+
+[cols="1,1,1,2,3a"]
+|===
+| name | type | required? | default | description
+
+| lib
+| `qualified-symbol?`
+| Yes
+|
+|
+
+| version
+| `string?`
+| Yes
+|
+|
+
+| source-dir
+| `string?`
+|
+| Your paths in deps.edn
+|
+
+| class-dir
+| `string?`
+|
+| "target/classes"
+|
+
+| jar-file
+| `string?`
+|
+| (format "target/%s.jar" lib)
+|
+
+| uber-file
+| `string?`
+|
+| (format "target/%s-standalone.jar" lib)
+| Required only for `uberjar`
+
+| main
+| `symbol?`
+|
+|
+| Required only for `uberjar`
+
+| scm
+| `map?`
+|
+|
+| You can generate pom.xml with https://maven.apache.org/scm/maven-scm-plugin/usage.html[scm] section.
+
+!===
+! name ! type
+
+! connection ! string?
+! developerConnection ! string?
+! url ! string?
+!===
+
+
+| changelog-file
+| `string?`
+|
+| "CHANGELOG.md"
+|
+
+| unreleased-title
+| `string?`
+|
+| "Unreleased"
+|
+
+| changelog-title
+| `string?`
+|
+| "## {{version}} ({{yyyy-mm-dd}})"
+|
+
+| github-actions?
+| `boolean?`
+|
+| false
+| See `GitHub Actions` section below for more information
+
+|===
+
+
+=== Available variables
+
+* `version`
+** `{{commit-count}}`
+* `changelog-title`
+** `{{version}}`
+** `{{yyyy-mm-dd}}`
+
+== GitHub Actions
+
+When you set `true` to `:github-actions?`, build.edn will set following outputs.
+
+[cols="2,2,6"]
+|===
+| Function | Output | Description
+
+| pom
+| `${{ steps.ID.outputs.pom  }}`
+| Path for the pom.xml file
+
+| jar
+| `${{ steps.ID.outputs.jar }}`
+| Path for the generated JAR file
+
+| uberjar
+| `${{ steps.ID.outputs.uberjar }}`
+| Path for the generated standalone JAR file
+
+| install
+| `${{ steps.ID.outputs.version }}`
+| Installed version string
+
+| deploy
+| `${{ steps.ID.outputs.version }}`
+| Deployed version string
+
+| tag-changelog
+| `${{ steps.ID.outputs.version }}`
+| Tagged version string
+
+|===
+
+== License
+
+Copyright © 2022 https://twitter.com/uochan[Masashi Iizuka]
+
+This program and the accompanying materials are made available under the
+terms of the Eclipse Public License 2.0 which is available at
+http://www.eclipse.org/legal/epl-2.0.
+
+This Source Code may also be made available under the following Secondary
+Licenses when the conditions for such availability set forth in the Eclipse
+Public License, v. 2.0 are satisfied: GNU General Public License as published by
+the Free Software Foundation, either version 2 of the License, or (at your
+option) any later version, with the GNU Classpath Exception which is available
+at https://www.gnu.org/software/classpath/license.html.
