@@ -24,7 +24,7 @@
    [:class-dir {:optional true} string?]
    [:jar-file {:optional true} string?]
    [:scm {:optional true} ?scm]
-   [:github-action? {:optional true} boolean?]])
+   [:github-actions? {:optional true} boolean?]])
 
 (def ^:private ?uber-build-config
   (mu/merge ?build-config
@@ -63,7 +63,7 @@
      :changelog-file "CHANGELOG.md"
      :unreleased-title "Unreleased"
      :changelog-title "## {{version}} ({{date}})"
-     :github-action? false}))
+     :github-actions? false}))
 
 (defn- gen-config
   [arg]
@@ -90,7 +90,7 @@
 
 (defn- set-gha-output
   [config k v]
-  (when (:github-action? config)
+  (when (:github-actions? config)
     (println (str "::set-output name=" k "::" v))))
 
 (defn pom
