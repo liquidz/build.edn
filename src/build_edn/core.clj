@@ -135,7 +135,7 @@
              :uber-file uber-file
              :basis basis
              :main main})
-    (set-gha-output config "jar" uber-file)))
+    (set-gha-output config "uberjar" uber-file)))
 
 (defn install
   [arg]
