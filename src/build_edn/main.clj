@@ -33,6 +33,12 @@
       (merge m)
       (core/install)))
 
+(defn deploy
+  [m]
+  (-> (load-config)
+      (merge m)
+      (core/deploy)))
+
 (defn tag-changelog
   [m]
   (-> (load-config)
