@@ -1,5 +1,5 @@
 {:lib com.github.liquidz/build.edn
  :version "0.1.{{commit-count}}"
  :changelog-file "CHANGELOG.adoc"
- :changelog-title "== {{version}} ({{date}})"
- :github-action? true}
+ :changelog-title "== {{version}} ({{yyyy-mm-dd}})"
+ :github-actions? true}
