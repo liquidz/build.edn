@@ -8,6 +8,10 @@
 
 Easy to build(jar, uberjar, install and deploy) your libraries.
 
+image:https://github.com/liquidz/build.edn/workflows/test/badge.svg["GitHub Actions for test workflow", link="https://github.com/liquidz/build.edn/actions?query=workflow%3Atest"]
+image:https://github.com/liquidz/build.edn/workflows/lint/badge.svg["GitHub Actions for lint workflow", link="https://github.com/liquidz/build.edn/actions?query=workflow%3Alint"]
+image:https://github.com/liquidz/build.edn/workflows/dependencies/badge.svg["GitHub Actions for dependencies workflow", link="https://github.com/liquidz/build.edn/actions?query=workflow%3Adependencies"]
+
 == Getting started
 
 build.edn make you buildable your libraries only preparing `build.edn` file for the simple usage.
