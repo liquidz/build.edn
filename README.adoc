@@ -71,8 +71,8 @@ $ clojur -T:build deploy
 | deploy
 | Deploy to https://clojars.org
 
-| tag-changelog
-| Append title to your CHANGELOG
+| update-documents
+| Update document files for new release
 
 |====
 
@@ -175,24 +175,21 @@ So if you want to tune the build process a bit more, you can use `build-edn.core
 ! url ! string?
 !===
 
+| documents
+| sequential?
+|
+|
+| Required only for `update-documents`
 
-| changelog-file
-| `string?`
-|
-| "CHANGELOG.md"
-|
+!===
+! name ! type
 
-| unreleased-title
-| `string?`
-|
-| "Unreleased"
-|
+! file ! string?
+! match ! string?
+! action ! enum `:append-before`, `:replace`, `:append-after`
+! text ! string?
 
-| changelog-title
-| `string?`
-|
-| "## {{version}} ({{yyyy-mm-dd}})"
-|
+!===
 
 | github-actions?
 | `boolean?`
@@ -207,9 +204,11 @@ So if you want to tune the build process a bit more, you can use `build-edn.core
 
 * `version`
 ** `{{commit-count}}`
-* `changelog-title`
+* `update-documents`
 ** `{{version}}`
 ** `{{yyyy-mm-dd}}`
+** `{{git-head-long-sha}}`
+** `{{git-head-short-sha}}`
 
 == GitHub Actions
 
@@ -239,7 +238,7 @@ When you set `true` to `:github-actions?`, build.edn will set following outputs.
 | `${{ steps.ID.outputs.version }}`
 | Deployed version string
 
-| tag-changelog
+| update-documents
 | `${{ steps.ID.outputs.version }}`
 | Tagged version string
 
