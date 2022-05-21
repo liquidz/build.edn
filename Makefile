@@ -11,6 +11,10 @@ install:
 test:
 	clojure -M:dev:test
 
+.PHONY: outdated
+outdated:
+	clojure -M:outdated --upgrade
+
 .PHONY: clean
 clean:
 	rm -rf .cpcache target
