@@ -28,7 +28,6 @@
 
 (defn install
   [m]
-  (println "FIXME" (pr-str m))
   (-> (load-config)
       (merge m)
       (core/install)))
