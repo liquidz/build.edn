@@ -1,9 +1,12 @@
 All notable changes to this project will be documented in this file. This change log follows the conventions of http://keepachangelog.com/[keepachangelog.com].
 
 == Unreleased (dev)
+// {{{
+=== Fixed
+* Fixed `update-documents` function not to remove newline at end of file.
+// }}}
 
 == 0.1.46 (2022-05-21)
-
 // {{{
 === Added
 * Added `update-documents` function.
