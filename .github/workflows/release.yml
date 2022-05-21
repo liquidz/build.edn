@@ -5,6 +5,7 @@ on: workflow_dispatch
 jobs:
   tag-and-release:
     runs-on: ubuntu-latest
+    permissions: write-all
     steps:
       - uses: actions/checkout@v3
         with:
@@ -27,24 +28,8 @@ jobs:
           path: ~/.m2
           key: test-m2-${{ hashFiles('deps.edn') }}-v1
 
-      - name: Deploy to clojars
-        id: deploy
-        run: clojure -T:build deploy
-        env:
-          CLOJARS_PASSWORD: ${{secrets.CLOJARS_PASSWORD}}
-          CLOJARS_USERNAME: ${{secrets.CLOJARS_USERNAME}}
-
-      - uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ steps.deploy.outputs.version }}
-          release_name: ${{ steps.deploy.outputs.version }}
-          body: released
-          draft: false
-          prerelease: false
-
-      - run: |
+      - id: tag
+        run: |
           clojure -T:build tag-changelog
           git diff
           git config --global user.email "github-actions@example.com"
@@ -52,3 +37,14 @@ jobs:
           git add -A
           git commit -m "Updated CHANGELOG" || exit 0
           git push
+
+      - uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.tag.outputs.version }}
+          release_name: ${{ steps.tag.outputs.version }}
+          body: released
+          draft: false
+          prerelease: false
+
