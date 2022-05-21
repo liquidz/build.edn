@@ -6,7 +6,7 @@
 // Need some preamble to get TOC:
 {empty}
 
-Easy to build(jar, uberjar, install and deploy) your libraries.
+Simplify your Clojure library build process such as `jar`, `uberjar`, `install`, `deploy` and so on.
 
 image:https://github.com/liquidz/build.edn/workflows/test/badge.svg["GitHub Actions for test workflow", link="https://github.com/liquidz/build.edn/actions?query=workflow%3Atest"]
 image:https://github.com/liquidz/build.edn/workflows/lint/badge.svg["GitHub Actions for lint workflow", link="https://github.com/liquidz/build.edn/actions?query=workflow%3Alint"]
