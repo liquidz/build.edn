@@ -2,6 +2,8 @@ All notable changes to this project will be documented in this file. This change
 
 == Unreleased (dev)
 
+== 0.1.46 (2022-05-21)
+
 // {{{
 === Added
 * Added `update-documents` function.
