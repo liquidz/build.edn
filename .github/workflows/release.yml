@@ -1,0 +1,55 @@
+name: Tag and Release
+
+on: workflow_dispatch
+
+jobs:
+  tag-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'adopt'
+          java-version: 11
+      - uses: DeLaGuardo/setup-clojure@master
+        with:
+          cli: latest
+
+      - name: Show versions
+        run: |
+          java -version
+          clojure --version
+
+      - uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: test-m2-${{ hashFiles('deps.edn') }}-v1
+
+      - name: Deploy to clojars
+        id: deploy
+        run: clojure -T:build deploy
+        env:
+          CLOJARS_PASSWORD: ${{secrets.CLOJARS_PASSWORD}}
+          CLOJARS_USERNAME: ${{secrets.CLOJARS_USERNAME}}
+
+      - uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.deploy.outputs.version }}
+          release_name: ${{ steps.deploy.outputs.version }}
+          body: |
+            released
+          draft: false
+          prerelease: false
+
+      - run: |
+          clojure -T:build tag-changelog
+          git diff
+          git config --global user.email "github-actions@example.com"
+          git config --global user.name "github-actions"
+          git add -A
+          git commit -m "Updated CHANGELOG" || exit 0
+          git push
