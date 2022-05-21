@@ -30,12 +30,12 @@ jobs:
 
       - id: tag
         run: |
-          clojure -T:build tag-changelog
+          clojure -T:build update-documents
           git diff
           git config --global user.email "github-actions@example.com"
           git config --global user.name "github-actions"
           git add -A
-          git commit -m "Updated CHANGELOG" || exit 0
+          git commit -m "Update for release" || exit 0
           git push
 
       - uses: actions/create-release@v1
