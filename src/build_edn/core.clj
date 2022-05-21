@@ -32,12 +32,17 @@
              [:uber-file string?]
              [:main symbol?]]))
 
-(def ^:private ?changelog-build-config
+(def ^:private ?document
+  [:map
+   [:file string?]
+   [:match string?]
+   [:action [:enum :append-before :replace :append-after]]
+   [:text string?]])
+
+(def ^:private ?documents-build-config
   (mu/merge ?build-config
             [:map
-             [:changelog-file string?]
-             [:unreleased-title string?]
-             [:changelog-title string?]]))
+             [:documents [:sequential ?document]]]))
 
 (defn- render
   [data format-string]
@@ -60,15 +65,28 @@
     {:class-dir "target/classes"
      :jar-file (format "target/%s.jar" lib-name)
      :uber-file (format "target/%s-standalone.jar" lib-name)
-     :changelog-file "CHANGELOG.md"
-     :unreleased-title "Unreleased"
-     :changelog-title "## {{version}} ({{yyyy-mm-dd}})"
      :github-actions? false}))
+
+(defn- current-yyyy-mm-dd
+  []
+  (.format (ZonedDateTime/now) DateTimeFormatter/ISO_LOCAL_DATE))
+
+(defn- git-commit-count
+  []
+  (or (b/git-count-revs nil) 0))
+
+(defn- git-head-revision
+  [short?]
+  (b/git-process
+   {:git-command "git"
+    :git-args (cond-> ["rev-parse"]
+                short? (conj "--short")
+                :always (conj "HEAD"))}))
 
 (defn- gen-config
   [arg]
   (or (:config arg)
-      (let [render-data {:commit-count (or (b/git-count-revs nil) 0)}
+      (let [render-data {:commit-count (git-commit-count)}
             config (cond-> arg
                      (str/includes? (:version arg) "{{")
                      (update :version #(render render-data %)))
@@ -161,18 +179,25 @@
                     :pom-file (b/pom-path {:lib lib :class-dir class-dir})})
     (set-gha-output config "version" version)))
 
-(defn tag-changelog
+(defn update-documents
   [arg]
-  (let [{:as config :keys [version changelog-file unreleased-title changelog-title]} (gen-config arg)
-        _ (validate-config! ?changelog-build-config config)
+  (let [{:as config :keys [version documents]} (gen-config arg)
+        _ (validate-config! ?documents-build-config config)
         render-data {:version version
-                     :yyyy-mm-dd (.format (ZonedDateTime/now) DateTimeFormatter/ISO_LOCAL_DATE)}
-        title (render render-data changelog-title)]
-    (->> (slurp changelog-file)
-         (str/split-lines)
-         (mapcat #(if (str/includes? % unreleased-title)
-                    [% "" title]
-                    [%]))
-         (str/join "\n")
-         (spit changelog-file))
+                     :git-head-long-sha (git-head-revision false)
+                     :git-head-short-sha (git-head-revision true)
+                     :yyyy-mm-dd (current-yyyy-mm-dd)}]
+    (doseq [{:keys [file match action text]} documents
+            :let [regexp (re-pattern match)
+                  text (render render-data text)]]
+      (->> (slurp file)
+           (str/split-lines)
+           (mapcat #(if (re-find regexp %)
+                      (case action
+                        :append-before [text %]
+                        :append-after [% text]
+                        [text])
+                      [%]))
+           (str/join "\n")
+           (spit file)))
     (set-gha-output config "version" version)))

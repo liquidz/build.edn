@@ -38,8 +38,8 @@
       (merge m)
       (core/deploy)))
 
-(defn tag-changelog
+(defn update-documents
   [m]
   (-> (load-config)
       (merge m)
-      (core/tag-changelog)))
+      (core/update-documents)))

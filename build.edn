@@ -3,6 +3,13 @@
  :scm {:connection "scm:git:git://github.com/liquidz/build.edn.git"
        :developerConnection "scm:git:ssh://git@github.com/liquidz/build.edn.git"
        :url "https://github.com/liquidz/build.edn"}
- :changelog-file "CHANGELOG.adoc"
- :changelog-title "== {{version}} ({{yyyy-mm-dd}})"
+
+ :documents [{:file "CHANGELOG.adoc"
+              :match "Unreleased"
+              :action :append-after
+              :text "\n== {{version}} ({{yyyy-mm-dd}})"}
+             {:file "README.adoc"
+              :match ":deps.+com\\.github\\.liquidz/build\\.edn"
+              :action :replace
+              :text " {:build {:deps {com.github.liquidz/build.edn {:git/tag \"{{version}}\" :git/sha \"{{git-head-short-sha}}\"}}"}]
  :github-actions? true}
