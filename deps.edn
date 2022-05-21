@@ -2,7 +2,9 @@
  :deps {org.clojure/clojure {:mvn/version "1.11.1"}
         io.github.clojure/tools.build {:git/tag "v0.8.2" :git/sha "ba1a2bf"}
         metosin/malli {:mvn/version "0.8.4"}
-        slipset/deps-deploy {:mvn/version "0.2.0"}}
+        slipset/deps-deploy {:mvn/version "0.2.0"}
+        pogonos/pogonos {:mvn/version "0.2.0"}}
+
  :aliases {:dev {:extra-paths ["test"]
                  :extra-deps {lambdaisland/kaocha {:mvn/version "1.66.1034"}}}
 

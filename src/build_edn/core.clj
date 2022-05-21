@@ -5,7 +5,8 @@
    [deps-deploy.deps-deploy :as deploy]
    [malli.core :as m]
    [malli.error :as me]
-   [malli.util :as mu])
+   [malli.util :as mu]
+   [pogonos.core :as pg])
   (:import
    java.time.ZonedDateTime
    java.time.format.DateTimeFormatter))
@@ -43,13 +44,6 @@
   (mu/merge ?build-config
             [:map
              [:documents [:sequential ?document]]]))
-
-(defn- render
-  [data format-string]
-  (reduce (fn [accm [k v]]
-            (str/replace accm (str "{{" (name k) "}}") v))
-          format-string
-          data))
 
 (defn- validate-config!
   ([config]
@@ -89,7 +83,7 @@
       (let [render-data {:commit-count (git-commit-count)}
             config (cond-> arg
                      (str/includes? (:version arg) "{{")
-                     (update :version #(render render-data %)))
+                     (update :version #(pg/render-string % render-data)))
             config (cond-> config
                      (contains? config :scm)
                      (assoc-in [:scm :tag] (:version config)))]
@@ -189,7 +183,7 @@
                      :yyyy-mm-dd (current-yyyy-mm-dd)}]
     (doseq [{:keys [file match action text]} documents
             :let [regexp (re-pattern match)
-                  text (render render-data text)]]
+                  text (pg/render-string text render-data)]]
       (->> (slurp file)
            (str/split-lines)
            (mapcat #(if (re-find regexp %)
