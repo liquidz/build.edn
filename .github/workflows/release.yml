@@ -40,8 +40,7 @@ jobs:
         with:
           tag_name: ${{ steps.deploy.outputs.version }}
           release_name: ${{ steps.deploy.outputs.version }}
-          body: |
-            released
+          body: released
           draft: false
           prerelease: false
 
