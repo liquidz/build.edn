@@ -28,10 +28,9 @@
    [:github-actions? {:optional true} boolean?]])
 
 (def ^:private ?uber-build-config
-  (mu/merge ?build-config
-            [:map
-             [:uber-file string?]
-             [:main symbol?]]))
+  [:map
+   [:uber-file string?]
+   [:main symbol?]])
 
 (def ^:private ?document
   [:map
@@ -41,9 +40,8 @@
    [:text string?]])
 
 (def ^:private ?documents-build-config
-  (mu/merge ?build-config
-            [:map
-             [:documents [:sequential ?document]]]))
+  [:map
+   [:documents [:sequential ?document]]])
 
 (defn- validate-config!
   ([config]
@@ -135,8 +133,9 @@
   (let [{:as config :keys [class-dir uber-file main]} (gen-config arg)
         basis (get-basis arg)
         src-dirs (get-src-dirs config basis)
-        arg (assoc arg :config config :basis basis)]
-    (validate-config! ?uber-build-config config)
+        arg (assoc arg :config config :basis basis)
+        ?schema (mu/merge ?build-config ?uber-build-config)]
+    (validate-config! ?schema config)
     (pom arg)
     (b/copy-dir {:src-dirs src-dirs
                  :target-dir class-dir})
@@ -176,7 +175,8 @@
 (defn update-documents
   [arg]
   (let [{:as config :keys [version documents]} (gen-config arg)
-        _ (validate-config! ?documents-build-config config)
+        ?schema (mu/merge ?build-config ?documents-build-config)
+        _ (validate-config! ?schema config)
         render-data {:version version
                      :git-head-long-sha (git-head-revision false)
                      :git-head-short-sha (git-head-revision true)
@@ -195,3 +195,13 @@
            (str/join "\n")
            (spit file)))
     (set-gha-output config "version" version)))
+
+(defn lint
+  [arg]
+  (let [config (gen-config arg)
+        ?schema (cond-> ?build-config
+                  (contains? config :documents)
+                  (mu/merge ?documents-build-config))]
+    (if-let [e (m/explain ?schema config)]
+      (println (me/humanize e))
+      (println "OK"))))

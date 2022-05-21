@@ -43,3 +43,9 @@
   (-> (load-config)
       (merge m)
       (core/update-documents)))
+
+(defn lint
+  [m]
+  (-> (load-config)
+      (merge m)
+      (core/lint)))
