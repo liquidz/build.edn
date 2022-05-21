@@ -210,6 +210,17 @@ So if you want to tune the build process a bit more, you can use `build-edn.core
 ** `{{git-head-long-sha}}`
 ** `{{git-head-short-sha}}`
 
+=== Lint your build.edn
+
+build.edn provides `build-edn.core/lint` and `build-edn.main/lint` function.
+
+When you use `:ns-default build-edn.main` setting, you can lint your `build.edn` file with the following command.
+
+[source,bash]
+----
+clojure -T:build lint
+----
+
 == GitHub Actions
 
 When you set `true` to `:github-actions?`, build.edn will set following outputs.
