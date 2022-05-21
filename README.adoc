@@ -31,7 +31,7 @@ build.edn make you buildable your libraries only preparing `build.edn` file for 
 [source,clojure]
 ----
 {:aliases
- {:build {:deps {com.github.liquidz/build.edn {:mvn/version "FIXME"}}
+ {:build {:deps {com.github.liquidz/build.edn {:git/tag "..." :git/sha "..."}}
           :ns-default build-edn.main}}}
 ----
 
