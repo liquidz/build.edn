@@ -28,6 +28,7 @@
     (with-redefs [slurp (constantly "foo\nbar\nbaz")
                   spit (fn [f content]
                          (swap! updated assoc f content))
+                  sut/current-yyyy-mm-dd (constantly "2112-09-03")
                   sut/git-commit-count (constantly "3")
                   sut/git-head-revision #(if % "short-sha" "long-sha")]
       (sut/update-documents {:lib 'foo/bar
@@ -44,7 +45,7 @@
                                           :match ".ar"
                                           :action :replace
                                           :text "hello {{git-head-short-sha}}"}]})
-      (t/is (= {"append_before.txt" "foo\nhello 1.2.3\nbar\nbaz"
+      (t/is (= {"append_before.txt" "foo\nhello 1.2.3 2112-09-03\nbar\nbaz"
                 "append_after.txt" "foo\nbar\nhello long-sha\nbaz"
                 "replace.txt" "foo\nhello short-sha\nbaz"}
                @updated)))))
