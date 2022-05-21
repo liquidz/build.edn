@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file. This change
 // {{{
 === Added
 * Added `update-documents` function.
+* Added `lint` function.
 
 === Removed
 * (BREAKING) Removed `tag-changelog` function.
