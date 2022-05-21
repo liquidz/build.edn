@@ -172,6 +172,16 @@
                     :pom-file (b/pom-path {:lib lib :class-dir class-dir})})
     (set-gha-output config "version" version)))
 
+(defn- update-line
+  [f s]
+  (let [tail-blanks (if (re-seq #"^\s*$" s)
+                      ""
+                      (first (re-seq #"\s*$" s)))
+        result (->> (str/split-lines s)
+                    (mapcat #(f [%]))
+                    (str/join "\n"))]
+    (str result tail-blanks)))
+
 (defn update-documents
   [arg]
   (let [{:as config :keys [version documents]} (gen-config arg)
@@ -185,14 +195,13 @@
             :let [regexp (re-pattern match)
                   text (pg/render-string text render-data)]]
       (->> (slurp file)
-           (str/split-lines)
-           (mapcat #(if (re-find regexp %)
-                      (case action
-                        :append-before [text %]
-                        :append-after [% text]
-                        [text])
-                      [%]))
-           (str/join "\n")
+           (update-line (fn [[line]]
+                          (if (re-find regexp line)
+                            (case action
+                              :append-before [text line]
+                              :append-after [line text]
+                              [text])
+                            [line])))
            (spit file)))
     (set-gha-output config "version" version)))
 

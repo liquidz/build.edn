@@ -48,4 +48,18 @@
       (t/is (= {"append_before.txt" "foo\nhello 1.2.3 2112-09-03\nbar\nbaz"
                 "append_after.txt" "foo\nbar\nhello long-sha\nbaz"
                 "replace.txt" "foo\nhello short-sha\nbaz"}
-               @updated)))))
+               @updated)))
+
+    (t/testing "tailing with blanks"
+      (let [updated (atom {})]
+        (with-redefs [slurp (constantly "foo\nbar\n")
+                      spit (fn [f content]
+                             (swap! updated assoc f content))]
+          (sut/update-documents {:lib 'foo/bar
+                                 :version "1.2.{{commit-count}}"
+                                 :documents [{:file "foo.txt"
+                                              :match "bar"
+                                              :action :append-after
+                                              :text "baz"}]})
+          (t/is (= {"foo.txt" "foo\nbar\nbaz\n"}
+                   @updated)))))))
