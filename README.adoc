@@ -255,6 +255,22 @@ When you set `true` to `:github-actions?`, build.edn will set following outputs.
 
 |===
 
+=== Automate your release process
+
+If you'd like to automate your release process with GitHub Actions, it is good to refer following examples:
+
+* https://github.com/liquidz/merr/blob/b4676c8cebc941de8581969f82734ef3d1674de0/.github/workflows/release.yml#L28-L43[liquidz/merr - .github/workflows/release.yml].
+* https://github.com/liquidz/antq/blob/1144b5ed0bb6b16ff3d08074a163bf99ac0a8926/.github/workflows/release.yml#L36-L60[liquidz/antq - .github/workflows/release.yml]
+
+== Projects using build.edn
+
+Of course, build.edn itself is using build.edn for releasing.
+
+* https://github.com/liquidz/antq[liquidz/antq]
+* https://github.com/liquidz/merr[liquidz/merr]
+* https://github.com/liquidz/testdoc[liquidz/testdoc]
+* https://github.com/liquidz/rewrite-indented[liquidz/rewrite-indented]
+
 == License
 
 Copyright © 2022 https://twitter.com/uochan[Masashi Iizuka]
