@@ -22,7 +22,7 @@ build.edn make you buildable your libraries only preparing `build.edn` file for 
 [source,clojure]
 ----
 {:lib com.github.YOUR-ACCOUNT/AWESOME-LIB
- :verion "0.1.{{commit-count}}"}
+ :version "0.1.{{commit-count}}"}
 ----
 
 * deps.edn
@@ -101,7 +101,7 @@ So if you want to tune the build process a bit more, you can use `build-edn.core
 
 (def ^:private config
   {:lib 'com.github.YOUR-ACCOUNT/AWESOME-LIB
-   :verion "0.1.{{commit-count}}"})
+   :version "0.1.{{commit-count}}"})
 
 (defn deploy
   [_]
