@@ -8,6 +8,8 @@
 
 Make your Clojure library build process easy.
 
+NOTE: This project is alpha version. Breaking changes may happen
+
 image:https://github.com/liquidz/build.edn/workflows/test/badge.svg["GitHub Actions for test workflow", link="https://github.com/liquidz/build.edn/actions?query=workflow%3Atest"]
 image:https://github.com/liquidz/build.edn/workflows/lint/badge.svg["GitHub Actions for lint workflow", link="https://github.com/liquidz/build.edn/actions?query=workflow%3Alint"]
 image:https://github.com/liquidz/build.edn/workflows/dependencies/badge.svg["GitHub Actions for dependencies workflow", link="https://github.com/liquidz/build.edn/actions?query=workflow%3Adependencies"]
