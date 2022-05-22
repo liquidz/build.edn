@@ -63,6 +63,26 @@
   []
   (.format (ZonedDateTime/now) DateTimeFormatter/ISO_LOCAL_DATE))
 
+(defn- current-yyyy
+  []
+  (.format (ZonedDateTime/now) (DateTimeFormatter/ofPattern "yyyy")))
+
+(defn- current-mm
+  []
+  (.format (ZonedDateTime/now) (DateTimeFormatter/ofPattern "MM")))
+
+(defn- current-m
+  []
+  (.format (ZonedDateTime/now) (DateTimeFormatter/ofPattern "M")))
+
+(defn- current-dd
+  []
+  (.format (ZonedDateTime/now) (DateTimeFormatter/ofPattern "dd")))
+
+(defn- current-d
+  []
+  (.format (ZonedDateTime/now) (DateTimeFormatter/ofPattern "d")))
+
 (defn- git-commit-count
   []
   (or (b/git-count-revs nil) 0))
@@ -78,7 +98,13 @@
 (defn- gen-config
   [arg]
   (or (:config arg)
-      (let [render-data {:commit-count (git-commit-count)}
+      (let [render-data {:commit-count (git-commit-count)
+                         :yyyy-mm-dd (current-yyyy-mm-dd)
+                         :yyyy (current-yyyy)
+                         :mm (current-mm)
+                         :m (current-m)
+                         :dd (current-dd)
+                         :d (current-d)}
             config (cond-> arg
                      (str/includes? (:version arg) "{{")
                      (update :version #(pg/render-string % render-data)))
@@ -190,7 +216,12 @@
         render-data {:version version
                      :git-head-long-sha (git-head-revision false)
                      :git-head-short-sha (git-head-revision true)
-                     :yyyy-mm-dd (current-yyyy-mm-dd)}]
+                     :yyyy-mm-dd (current-yyyy-mm-dd)
+                     :yyyy (current-yyyy)
+                     :mm (current-mm)
+                     :m (current-m)
+                     :dd (current-dd)
+                     :d (current-d)}]
     (doseq [{:keys [file match action text]} documents
             :let [regexp (re-pattern match)
                   text (pg/render-string text render-data)]]
