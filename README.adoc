@@ -204,9 +204,20 @@ So if you want to tune the build process a bit more, you can use `build-edn.core
 
 * `version`
 ** `{{commit-count}}`
+** `{{yyyy-mm-dd}}`
+** `{{yyyy}}` - year-of-era
+** `{{mm}}` - month-of-year
+** `{{m}}` - month-of-year
+** `{{dd}}` - day-of-month
+** `{{d}}` - day-of-month
 * `update-documents`
 ** `{{version}}`
 ** `{{yyyy-mm-dd}}`
+** `{{yyyy}}` - year-of-era
+** `{{mm}}` - month-of-year
+** `{{m}}` - month-of-year
+** `{{dd}}` - day-of-month
+** `{{d}}` - day-of-month
 ** `{{git-head-long-sha}}`
 ** `{{git-head-short-sha}}`
 
