@@ -1,5 +1,5 @@
 {:lib com.github.liquidz/build.edn
- :version "0.1.{{commit-count}}"
+ :version "0.1.{{git/commit-count}}"
  :scm {:connection "scm:git:git://github.com/liquidz/build.edn.git"
        :developerConnection "scm:git:ssh://git@github.com/liquidz/build.edn.git"
        :url "https://github.com/liquidz/build.edn"}
@@ -7,9 +7,9 @@
  :documents [{:file "CHANGELOG.adoc"
               :match "Unreleased"
               :action :append-after
-              :text "\n== {{version}} ({{yyyy-mm-dd}})"}
+              :text "\n== {{version}} ({{now/yyyy}}-{{now/mm}}-{{now/dd}})"}
              {:file "README.adoc"
               :match ":deps.+com\\.github\\.liquidz/build\\.edn"
               :action :replace
-              :text " {:build {:deps {com.github.liquidz/build.edn {:git/tag \"{{version}}\" :git/sha \"{{git-head-short-sha}}\"}}"}]
+              :text " {:build {:deps {com.github.liquidz/build.edn {:git/tag \"{{version}}\" :git/sha \"{{git/head-short-sha}}\"}}"}]
  :github-actions? true}

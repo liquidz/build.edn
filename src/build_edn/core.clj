@@ -1,117 +1,45 @@
 (ns build-edn.core
   (:require
+   [build-edn.schema :as be.schema]
+   [build-edn.variable :as be.var]
    [clojure.string :as str]
    [clojure.tools.build.api :as b]
    [deps-deploy.deps-deploy :as deploy]
    [malli.core :as m]
    [malli.error :as me]
    [malli.util :as mu]
-   [pogonos.core :as pg])
-  (:import
-   java.time.ZonedDateTime
-   java.time.format.DateTimeFormatter))
+   [pogonos.core :as pg]))
 
-(def ^:private ?scm
-  [:map
-   [:connection string?]
-   [:developerConnection string?]
-   [:url string?]])
+(def ^:private default-configs
+  {:class-dir "target/classes"
+   :jar-file "target/{{lib}}.jar"
+   :uber-file "target/{{lib}}-standalone.jar"
+   :github-actions? false})
 
-(def ^:private ?build-config
-  [:map
-   [:lib qualified-symbol?]
-   [:version string?]
-   [:source-dir {:optional true} string?]
-   [:class-dir {:optional true} string?]
-   [:jar-file {:optional true} string?]
-   [:scm {:optional true} ?scm]
-   [:github-actions? {:optional true} boolean?]])
-
-(def ^:private ?uber-build-config
-  [:map
-   [:uber-file string?]
-   [:main symbol?]])
-
-(def ^:private ?document
-  [:map
-   [:file string?]
-   [:match string?]
-   [:action [:enum :append-before :replace :append-after]]
-   [:text string?]])
-
-(def ^:private ?documents-build-config
-  [:map
-   [:documents [:sequential ?document]]])
+(defn- getenv
+  [k]
+  (System/getenv k))
 
 (defn- validate-config!
   ([config]
-   (validate-config! ?build-config config))
+   (validate-config! be.schema/?build-config config))
   ([?schema config]
    (when-let [e (m/explain ?schema config)]
      (let [m (me/humanize e)]
        (throw (ex-info (str "Invalid config: " m) m))))))
 
-(defn- get-defaults
-  [config]
-  (let [lib-name (name (:lib config))]
-    {:class-dir "target/classes"
-     :jar-file (format "target/%s.jar" lib-name)
-     :uber-file (format "target/%s-standalone.jar" lib-name)
-     :github-actions? false}))
-
-(defn- current-yyyy-mm-dd
-  []
-  (.format (ZonedDateTime/now) DateTimeFormatter/ISO_LOCAL_DATE))
-
-(defn- current-yyyy
-  []
-  (.format (ZonedDateTime/now) (DateTimeFormatter/ofPattern "yyyy")))
-
-(defn- current-mm
-  []
-  (.format (ZonedDateTime/now) (DateTimeFormatter/ofPattern "MM")))
-
-(defn- current-m
-  []
-  (.format (ZonedDateTime/now) (DateTimeFormatter/ofPattern "M")))
-
-(defn- current-dd
-  []
-  (.format (ZonedDateTime/now) (DateTimeFormatter/ofPattern "dd")))
-
-(defn- current-d
-  []
-  (.format (ZonedDateTime/now) (DateTimeFormatter/ofPattern "d")))
-
-(defn- git-commit-count
-  []
-  (or (b/git-count-revs nil) 0))
-
-(defn- git-head-revision
-  [short?]
-  (b/git-process
-   {:git-command "git"
-    :git-args (cond-> ["rev-parse"]
-                short? (conj "--short")
-                :always (conj "HEAD"))}))
-
 (defn- gen-config
   [arg]
   (or (:config arg)
-      (let [render-data {:commit-count (git-commit-count)
-                         :yyyy-mm-dd (current-yyyy-mm-dd)
-                         :yyyy (current-yyyy)
-                         :mm (current-mm)
-                         :m (current-m)
-                         :dd (current-dd)
-                         :d (current-d)}
+      (let [render-data (be.var/variable-map)
             config (cond-> arg
-                     (str/includes? (:version arg) "{{")
+                     (and (:version arg)
+                          (str/includes? (:version arg) "{{"))
                      (update :version #(pg/render-string % render-data)))
             config (cond-> config
                      (contains? config :scm)
                      (assoc-in [:scm :tag] (:version config)))]
-        (merge (get-defaults config) config))))
+        (merge default-configs config))))
 
 (defn- get-basis
   [arg]
@@ -132,36 +60,43 @@
 (defn pom
   [arg]
   (let [config (gen-config arg)
-        basis (get-basis arg)]
-    (validate-config! config)
+        _ (validate-config! config)
+        basis (get-basis arg)
+        pom-path (b/pom-path config)]
     (-> config
         (select-keys [:lib :version :class-dir :scm])
         (assoc :basis basis
                :src-dirs (get-src-dirs config basis))
         (b/write-pom))
-    (set-gha-output config "pom" (b/pom-path config))))
+    (set-gha-output config "pom" pom-path)
+    pom-path))
 
 (defn jar
   [arg]
-  (let [{:as config :keys [class-dir jar-file]} (gen-config arg)
+  (let [{:as config :keys [lib class-dir jar-file]} (gen-config arg)
+        _ (validate-config! config)
         basis (get-basis arg)
-        arg (assoc arg :config config :basis basis)]
-    (validate-config! config)
+        arg (assoc arg :config config :basis basis)
+        render-data {:lib (name lib)}
+        jar-file (pg/render-string jar-file render-data)]
     (pom arg)
     (b/copy-dir {:src-dirs (get-src-dirs config basis)
                  :target-dir class-dir})
     (b/jar {:class-dir class-dir
             :jar-file jar-file})
-    (set-gha-output config "jar" jar-file)))
+    (set-gha-output config "jar" jar-file)
+    jar-file))
 
 (defn uberjar
   [arg]
-  (let [{:as config :keys [class-dir uber-file main]} (gen-config arg)
+  (let [{:as config :keys [lib class-dir uber-file main]} (gen-config arg)
+        ?schema (mu/merge be.schema/?build-config be.schema/?uber-build-config)
+        _ (validate-config! ?schema config)
         basis (get-basis arg)
         src-dirs (get-src-dirs config basis)
         arg (assoc arg :config config :basis basis)
-        ?schema (mu/merge ?build-config ?uber-build-config)]
-    (validate-config! ?schema config)
+        render-data {:lib (name lib)}
+        uber-file (pg/render-string uber-file render-data)]
     (pom arg)
     (b/copy-dir {:src-dirs src-dirs
                  :target-dir class-dir})
@@ -172,31 +107,35 @@
              :uber-file uber-file
              :basis basis
              :main main})
-    (set-gha-output config "uberjar" uber-file)))
+    (set-gha-output config "uberjar" uber-file)
+    uber-file))
 
 (defn install
   [arg]
-  (let [{:as config :keys [lib version class-dir jar-file]} (gen-config arg)
-        arg (assoc arg :config config)]
-    (validate-config! config)
-    (jar arg)
+  (let [{:as config :keys [lib version class-dir]} (gen-config arg)
+        _ (validate-config! config)
+        arg (assoc arg :config config)
+        jar-file (jar arg)]
     (deploy/deploy {:artifact jar-file
                     :installer :local
                     :pom-file (b/pom-path {:lib lib :class-dir class-dir})})
-    (set-gha-output config "version" version)))
+    (set-gha-output config "version" version)
+    version))
 
 (defn deploy
   [arg]
-  (assert (and (System/getenv "CLOJARS_USERNAME")
-               (System/getenv "CLOJARS_PASSWORD")))
-  (let [{:as config :keys [lib version class-dir jar-file]} (gen-config arg)
-        arg (assoc arg :config config)]
-    (validate-config! config)
-    (jar arg)
+  (assert (and (getenv "CLOJARS_USERNAME")
+               (getenv "CLOJARS_PASSWORD"))
+          "CLOJARS_USERNAME and CLOJARS_PASSWORD are required")
+  (let [{:as config :keys [lib version class-dir]} (gen-config arg)
+        _ (validate-config! config)
+        arg (assoc arg :config config)
+        jar-file (jar arg)]
     (deploy/deploy {:artifact jar-file
                     :installer :remote
                     :pom-file (b/pom-path {:lib lib :class-dir class-dir})})
-    (set-gha-output config "version" version)))
+    (set-gha-output config "version" version)
+    version))
 
 (defn- update-line
   [f s]
@@ -211,17 +150,10 @@
 (defn update-documents
   [arg]
   (let [{:as config :keys [version documents]} (gen-config arg)
-        ?schema (mu/merge ?build-config ?documents-build-config)
+        ?schema (mu/merge be.schema/?build-config be.schema/?documents-build-config)
         _ (validate-config! ?schema config)
-        render-data {:version version
-                     :git-head-long-sha (git-head-revision false)
-                     :git-head-short-sha (git-head-revision true)
-                     :yyyy-mm-dd (current-yyyy-mm-dd)
-                     :yyyy (current-yyyy)
-                     :mm (current-mm)
-                     :m (current-m)
-                     :dd (current-dd)
-                     :d (current-d)}]
+        render-data (assoc (be.var/variable-map)
+                           :version version)]
     (doseq [{:keys [file match action text]} documents
             :let [regexp (re-pattern match)
                   text (pg/render-string text render-data)]]
@@ -234,14 +166,17 @@
                               [text])
                             [line])))
            (spit file)))
-    (set-gha-output config "version" version)))
+    (set-gha-output config "version" version)
+    version))
 
 (defn lint
   [arg]
   (let [config (gen-config arg)
-        ?schema (cond-> ?build-config
+        ?schema (cond-> be.schema/?build-config
                   (contains? config :documents)
-                  (mu/merge ?documents-build-config))]
+                  (mu/merge be.schema/?documents-build-config))]
     (if-let [e (m/explain ?schema config)]
-      (println (me/humanize e))
-      (println "OK"))))
+      (do (println (me/humanize e))
+          false)
+      (do (println "OK")
+          true))))
