@@ -1,6 +1,21 @@
 All notable changes to this project will be documented in this file. This change log follows the conventions of http://keepachangelog.com/[keepachangelog.com].
 
 == Unreleased (dev)
+// {{{
+=== Changed
+* (BREAKING) Rename variables.
+** `{{commit-count}}` -> `{{git/commit-count}}`
+** `{{git-head-long-sha}}` -> `{{git/head-long-sha}}`
+** `{{git-head-short-sha}}` -> `{{git/head-short-sha}}`
+** `{{yyyy}}` -> `{{now/yyyy}}`
+** `{{mm}}` -> `{{now/mm}}`
+** `{{m}}` -> `{{now/m}}`
+** `{{dd}}` -> `{{now/dd}}`
+** `{{d}}` -> `{{now/d}}`
+
+=== Removed
+* (BREAKING) Removed `{{yyyy-mm-dd}}` variable.
+// }}}
 
 == 0.1.55 (2022-05-22)
 // {{{
