@@ -47,7 +47,7 @@ $ clojure -T:build install
 
 # Deploy to clojars.org
 # CLOJARS_USERNAME and CLOJARS_PASSWORD environmental variables are required
-$ clojur -T:build deploy
+$ clojure -T:build deploy
 ----
 
 == API
