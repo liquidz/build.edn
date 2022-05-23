@@ -24,7 +24,7 @@ build.edn make you buildable your libraries only preparing `build.edn` file for 
 [source,clojure]
 ----
 {:lib com.github.YOUR-ACCOUNT/AWESOME-LIB
- :version "0.1.{{commit-count}}"}
+ :version "0.1.{{git/commit-count}}"}
 ----
 
 * deps.edn
@@ -103,7 +103,7 @@ So if you want to tune the build process a bit more, you can use `build-edn.core
 
 (def ^:private config
   {:lib 'com.github.YOUR-ACCOUNT/AWESOME-LIB
-   :version "0.1.{{commit-count}}"})
+   :version "0.1.{{git/commit-count}}"})
 
 (defn deploy
   [_]
@@ -117,7 +117,7 @@ So if you want to tune the build process a bit more, you can use `build-edn.core
 
 === build.edn
 
-[cols="1,1,1,2,3a"]
+[cols="1,1,1,1,6a"]
 |===
 | name | type | required? | default | description
 
@@ -148,13 +148,13 @@ So if you want to tune the build process a bit more, you can use `build-edn.core
 | jar-file
 | `string?`
 |
-| (format "target/%s.jar" lib)
+| "target/{{lib}}.jar"
 |
 
 | uber-file
 | `string?`
 |
-| (format "target/%s-standalone.jar" lib)
+| "target/{{lib}}-standalone.jar"
 | Required only for `uberjar`
 
 | main
@@ -178,7 +178,7 @@ So if you want to tune the build process a bit more, you can use `build-edn.core
 !===
 
 | documents
-| sequential?
+| `sequential?`
 |
 |
 | Required only for `update-documents`
@@ -204,24 +204,50 @@ So if you want to tune the build process a bit more, you can use `build-edn.core
 
 === Available variables
 
-* `version`
-** `{{commit-count}}`
-** `{{yyyy-mm-dd}}`
-** `{{yyyy}}` - year-of-era
-** `{{mm}}` - month-of-year
-** `{{m}}` - month-of-year
-** `{{dd}}` - day-of-month
-** `{{d}}` - day-of-month
-* `update-documents`
-** `{{version}}`
-** `{{yyyy-mm-dd}}`
-** `{{yyyy}}` - year-of-era
-** `{{mm}}` - month-of-year
-** `{{m}}` - month-of-year
-** `{{dd}}` - day-of-month
-** `{{d}}` - day-of-month
-** `{{git-head-long-sha}}`
-** `{{git-head-short-sha}}`
+|===
+| Name | Available parameters | Description
+
+| `{{git/commit-count}}`
+| `version`, `text` in `documents`
+|
+
+| `{{git/head-long-sha}}`
+| `version`, `text` in `documents`
+|
+
+| `{{git/head-short-sha}}`
+| `version`, `text` in `documents`
+|
+
+| `{{now/yyyy}}`
+| `version`, `text` in `documents`
+| year-of-era
+
+| `{{now/mm}}`
+| `version`, `text` in `documents`
+| month-of-year
+
+| `{{now/m}}`
+| `version`, `text` in `documents`
+| month-of-year
+
+| `{{now/dd}}`
+| `version`, `text` in `documents`
+| day-of-month
+
+| `{{now/d}}`
+| `version`, `text` in `documents`
+| day-of-month
+
+| `{{version}}`
+| `text` in `documents`
+|
+
+| `{{lib}}`
+| `jar-file`, `uber-file`
+|
+
+|===
 
 === Lint your build.edn
 
