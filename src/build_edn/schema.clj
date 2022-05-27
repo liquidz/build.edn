@@ -31,3 +31,15 @@
 (def ?documents-build-config
   [:map
    [:documents [:sequential ?document]]])
+
+(def ?deploy-repository
+  [:map
+   [:url string?]
+   [:username {:optional true} string?]
+   [:password {:optional true} string?]
+   [:gpg/credential-file {:optional true} string?]
+   [:allow-insecure-http-repository? {:optional true} boolean?]])
+
+(def ?deploy-repositories-build-config
+  [:map
+   [:deploy-repository ?deploy-repository]])
