@@ -124,16 +124,14 @@
 
 (defn deploy
   [arg]
-  (assert (and (getenv "CLOJARS_USERNAME")
-               (getenv "CLOJARS_PASSWORD"))
-          "CLOJARS_USERNAME and CLOJARS_PASSWORD are required")
   (let [{:as config :keys [lib version class-dir]} (gen-config arg)
         _ (validate-config! config)
         arg (assoc arg :config config)
         jar-file (jar arg)]
-    (deploy/deploy {:artifact jar-file
-                    :installer :remote
-                    :pom-file (b/pom-path {:lib lib :class-dir class-dir})})
+    (deploy/deploy (merge arg
+                          {:artifact jar-file
+                           :installer :remote
+                           :pom-file (b/pom-path {:lib lib :class-dir class-dir})}))
     (set-gha-output config "version" version)
     version))
 
