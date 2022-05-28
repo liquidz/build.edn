@@ -20,12 +20,20 @@
 
 
 (t/deftest config-test
-  (with-redefs [b/git-count-revs (constantly "3")]
+  (with-redefs [b/git-count-revs (constantly "3")
+                sut/getenv #(case %
+                              "CLOJARS_USERNAME" "foo"
+                              "CLOJARS_PASSWORD" "bar"
+                              nil)]
     (t/is (= {:lib 'foo/bar
               :version "1.2.3"
               :jar-file "target/{{lib}}.jar"
               :uber-file "target/{{lib}}-standalone.jar"
               :class-dir "target/classes"
+              :deploy-repository {:url "https://clojars.org/repo"
+                                  :username "foo"
+                                  :password "bar"
+                                  :allow-insecure-http-repository? false}
               :github-actions? false}
              (#'sut/gen-config {:lib 'foo/bar
                                 :version "1.2.{{git/commit-count}}"})))
@@ -36,7 +44,17 @@
                                           :scm {:connection "a"
                                                 :developerConnection "b"
                                                 :url "c"}})
-                       :scm)))))
+                       :scm))))
+
+  (t/testing "deploy-repository"
+    (t/is (= {:url "https://clojars.org/repo"
+              :gpg/credential-file "dummy"
+              :allow-insecure-http-repository? false}
+             (-> {:lib 'foo/bar
+                  :version "1.2.{{git/commit-count}}"
+                  :deploy-repository {:gpg/credential-file "dummy"}}
+                 (#'sut/gen-config)
+                 (:deploy-repository))))))
 
 (t/deftest pom-test
   (t/testing "normal"
@@ -166,7 +184,10 @@
         (t/is (some? (sut/deploy {:lib 'foo/bar :version "1.2.{{git/commit-count}}"}))))
       (t/is (= {:artifact "./target/dummy.jar"
                 :installer :remote
-                :pom-file "./target/classes/META-INF/maven/foo/bar/pom.xml"}
+                :pom-file "./target/classes/META-INF/maven/foo/bar/pom.xml"
+                :repository {"release" {:url "https://clojars.org/repo"
+                                        :username "alice"
+                                        :password "password"}}}
                @deploy-arg))))
 
   (t/testing "github-actions?"
@@ -183,8 +204,6 @@
         (t/is (= ret "1.2.3")))))
 
   (t/testing "validation error"
-    (t/is (thrown-with-msg? AssertionError #"CLOJARS_USERNAME and CLOJARS_PASSWORD are required"
-            (sut/deploy {:lib 'foo/bar :version "1"})))
     (with-redefs [sut/getenv #(case %
                                 "CLOJARS_USERNAME" "alice"
                                 "CLOJARS_PASSWORD" "password"

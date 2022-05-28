@@ -1,24 +1,35 @@
 (ns build-edn.core
   (:require
+   [build-edn.gpg :as be.gpg]
    [build-edn.schema :as be.schema]
    [build-edn.variable :as be.var]
+   [cemerick.pomegranate.aether :as aether]
    [clojure.string :as str]
    [clojure.tools.build.api :as b]
    [deps-deploy.deps-deploy :as deploy]
    [malli.core :as m]
    [malli.error :as me]
    [malli.util :as mu]
-   [pogonos.core :as pg]))
-
-(def ^:private default-configs
-  {:class-dir "target/classes"
-   :jar-file "target/{{lib}}.jar"
-   :uber-file "target/{{lib}}-standalone.jar"
-   :github-actions? false})
+   [pogonos.core :as pg])
+  (:import
+   org.apache.maven.wagon.providers.http.HttpWagon))
 
 (defn- getenv
   [k]
   (System/getenv k))
+
+(defn- gen-default-configs
+  []
+  {:class-dir "target/classes"
+   :jar-file "target/{{lib}}.jar"
+   :uber-file "target/{{lib}}-standalone.jar"
+   :deploy-repository (let [username (getenv "CLOJARS_USERNAME")
+                            password (getenv "CLOJARS_PASSWORD")]
+                        (cond-> {:url "https://clojars.org/repo"
+                                 :allow-insecure-http-repository? false}
+                          username (assoc :username username)
+                          password (assoc :password password)))
+   :github-actions? false})
 
 (defn- validate-config!
   ([config]
@@ -38,8 +49,11 @@
                      (update :version #(pg/render-string % render-data)))
             config (cond-> config
                      (contains? config :scm)
-                     (assoc-in [:scm :tag] (:version config)))]
-        (merge default-configs config))))
+                     (assoc-in [:scm :tag] (:version config)))
+            defaults (gen-default-configs)]
+        (-> defaults
+            (merge config)
+            (update :deploy-repository #(merge (:deploy-repository defaults) %))))))
 
 (defn- get-basis
   [arg]
@@ -124,16 +138,24 @@
 
 (defn deploy
   [arg]
-  (assert (and (getenv "CLOJARS_USERNAME")
-               (getenv "CLOJARS_PASSWORD"))
-          "CLOJARS_USERNAME and CLOJARS_PASSWORD are required")
-  (let [{:as config :keys [lib version class-dir]} (gen-config arg)
-        _ (validate-config! config)
+  (let [{:as config :keys [lib version class-dir deploy-repository]} (gen-config arg)
+        ?schema (mu/merge be.schema/?build-config be.schema/?deploy-repositories-build-config)
+        _ (validate-config! ?schema config)
+        repo (cond-> deploy-repository
+               (some? (:gpg/credential-file deploy-repository))
+               (merge (be.gpg/get-credential-by-repository deploy-repository)))
         arg (assoc arg :config config)
         jar-file (jar arg)]
+
+    (when (:allow-insecure-http-repository? repo)
+      (aether/register-wagon-factory! "http" #(HttpWagon.)))
+
     (deploy/deploy {:artifact jar-file
                     :installer :remote
-                    :pom-file (b/pom-path {:lib lib :class-dir class-dir})})
+                    :pom-file (b/pom-path {:lib lib :class-dir class-dir})
+                    :repository {"release" (dissoc repo
+                                                   :allow-insecure-http-repository?)}})
+
     (set-gha-output config "version" version)
     version))
 
