@@ -1,6 +1,16 @@
 All notable changes to this project will be documented in this file. This change log follows the conventions of http://keepachangelog.com/[keepachangelog.com].
 
 == Unreleased (dev)
+// {{{
+=== Added
+* https://github.com/liquidz/build.edn/issues/3[#3]: Added `:deploy-repository` key to `build.edn` file.
+** This setting manages remote Maven repository URLs and credentials.
+** See link:./doc/deploy.adoc[doc/deploy.adoc] for more details.
+
+=== Changed
+* Updated `build.edn` file to be able to contain environmental variables.
+** This feature is powered by https://github.com/juxt/aero[juxt/aero].
+// }}}
 
 == 0.2.63 (2022-05-23)
 // {{{
