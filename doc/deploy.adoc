@@ -1,0 +1,79 @@
+= deploy
+
+`build.edn` file has a key named link:./format/deploy-repository.adoc[:deploy-repository].
+
+== Repository URLs
+
+Repository URL is determined by repository `:id`.
+
+The default pair of `:id` and URL is below.
+
+- `"central"` -- https://repo1.maven.org/maven2/
+- `"clojars"` -- https://repo.clojars.org/
+
+Other custom URLs could be defined by https://clojure.org/reference/deps_and_cli#_maven[mvn/repos] in `deps.edn` file or `build.edn` explicitly.
+
+=== deps.edn
+[source,clojure]
+----
+{:mvn/repos {"custom-id" {:url "https://custom.example.com"}}}
+----
+
+=== build.edn
+[source,clojure]
+----
+{:deploy-repository {:url "https://custom.example.com"}}
+----
+
+== Credentials
+
+`:username` and `:password` could be managed by several ways.
+
+=== ~/.m2/settings.xml
+
+At first, build.edn will refer `~/.m2/settings.xml` to see if it has a setting which matchs the `:id`.
+
+https://maven.apache.org/settings.html#Servers
+
+[source,xml]
+----
+<settings>
+  <servers>
+    <server>
+      <id>clojars</id>
+      <username>foo</username>
+      <password>bar</password>
+    </server>
+  </servers>
+</settings>
+----
+
+==== Password encryption
+
+In the above example, password is managed as a plain text.
+If you don't want to manage password as a plain text, you can encrypt it by Maven.
+
+See the following guide page to encrypt passwords in settings.xml.
+
+https://maven.apache.org/guides/mini/guide-encryption.html
+
+
+=== Environmental variables
+
+When the corresponding server is not found in `~/.m2/settings.xml`,
+build.edn will refer environmental variables.
+
+If you don't specify `:username` and `:password` in `:deploy-repository` map,
+build.edn will refer following environmental variables.
+
+- `:username` -- `CLOJARS_USERNAME`
+- `:password` -- `CLOJARS_PASSWORD`
+
+If you'd like to use other environmental variables, please specify them like below in `:deploy-repository` map.
+
+[source,clojure]
+----
+{:deploy-repository {:username #env YOUR_USERNAME
+                     :password #env YOUR_PASSWORD}}
+----
+

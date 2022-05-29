@@ -1,5 +1,5 @@
 {:lib com.github.liquidz/build.edn
- :version "0.2.{{git/commit-count}}"
+ :version "0.3.{{git/commit-count}}"
  :scm {:connection "scm:git:git://github.com/liquidz/build.edn.git"
        :developerConnection "scm:git:ssh://git@github.com/liquidz/build.edn.git"
        :url "https://github.com/liquidz/build.edn"}

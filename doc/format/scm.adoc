@@ -1,0 +1,26 @@
+= scm
+
+`scm` section is used to detect where source codes are managed in remote Maven repositories such as https://clojars.org[clojars.org].
+
+https://maven.apache.org/scm/maven-scm-plugin/usage.html
+
+[cols="1,1,1,6a"]
+|===
+| name | type | required? | description
+
+| connection
+| `string?`
+| Yes
+|
+
+| developerConnection
+| `string?`
+| Yes
+|
+
+| url
+| `string?`
+| Yes
+|
+
+|===

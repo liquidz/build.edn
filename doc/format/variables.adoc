@@ -1,0 +1,46 @@
+= Available variables
+
+|===
+| Name | Available parameters | Description
+
+| `{{git/commit-count}}`
+| `version`, `text` in `documents`
+|
+
+| `{{git/head-long-sha}}`
+| `version`, `text` in `documents`
+|
+
+| `{{git/head-short-sha}}`
+| `version`, `text` in `documents`
+|
+
+| `{{now/yyyy}}`
+| `version`, `text` in `documents`
+| year-of-era
+
+| `{{now/mm}}`
+| `version`, `text` in `documents`
+| month-of-year
+
+| `{{now/m}}`
+| `version`, `text` in `documents`
+| month-of-year
+
+| `{{now/dd}}`
+| `version`, `text` in `documents`
+| day-of-month
+
+| `{{now/d}}`
+| `version`, `text` in `documents`
+| day-of-month
+
+| `{{version}}`
+| `text` in `documents`
+|
+
+| `{{lib}}`
+| `jar-file`, `uber-file`
+|
+
+|===
