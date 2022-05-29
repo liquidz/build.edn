@@ -1,5 +1,6 @@
 (ns build-edn.core
   (:require
+   [build-edn.repository :as be.repo]
    [build-edn.schema :as be.schema]
    [build-edn.variable :as be.var]
    [clojure.string :as str]
@@ -14,11 +15,8 @@
   {:class-dir "target/classes"
    :jar-file "target/{{lib}}.jar"
    :uber-file "target/{{lib}}-standalone.jar"
+   :deploy-repository {:id "clojars"}
    :github-actions? false})
-
-(defn- getenv
-  [k]
-  (System/getenv k))
 
 (defn- validate-config!
   ([config]
@@ -124,14 +122,22 @@
 
 (defn deploy
   [arg]
-  (let [{:as config :keys [lib version class-dir]} (gen-config arg)
-        _ (validate-config! config)
+  (let [{:as config :keys [lib version class-dir deploy-repository]} (gen-config arg)
+        ?schema (mu/merge be.schema/?build-config be.schema/?deploy-repository-build-config)
+        _ (validate-config! ?schema config)
+        {:keys [id username password url]} deploy-repository
         arg (assoc arg :config config)
-        jar-file (jar arg)]
-    (deploy/deploy (merge arg
-                          {:artifact jar-file
-                           :installer :remote
-                           :pom-file (b/pom-path {:lib lib :class-dir class-dir})}))
+        jar-file (jar arg)
+        repo (some-> id
+                     (be.repo/repository-by-id)
+                     (cond->
+                      username (assoc-in [id :username] username)
+                      password (assoc-in [id :password] password)
+                      url (assoc-in [id :url] url)))]
+    (deploy/deploy (cond-> {:artifact jar-file
+                            :installer :remote
+                            :pom-file (b/pom-path {:lib lib :class-dir class-dir})}
+                     repo (assoc :repository repo)))
     (set-gha-output config "version" version)
     version))
 

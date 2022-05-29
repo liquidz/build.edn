@@ -1,10 +1,12 @@
 (ns build-edn.core-test
   (:require
    [build-edn.core :as sut]
+   [build-edn.repository :as be.repo]
    [build-edn.variable :as be.var]
    [clojure.string :as str]
    [clojure.test :as t]
    [clojure.tools.build.api :as b]
+   [clojure.tools.deps.alpha.util.maven :as deps.u.maven]
    [deps-deploy.deps-deploy :as deploy])
   (:import
    clojure.lang.ExceptionInfo))
@@ -18,7 +20,6 @@
          {:ret ret#
           :out (when (seq out#) out#)}))))
 
-
 (t/deftest config-test
   (with-redefs [b/git-count-revs (constantly "3")]
     (t/is (= {:lib 'foo/bar
@@ -26,6 +27,7 @@
               :jar-file "target/{{lib}}.jar"
               :uber-file "target/{{lib}}-standalone.jar"
               :class-dir "target/classes"
+              :deploy-repository {:id "clojars"}
               :github-actions? false}
              (#'sut/gen-config {:lib 'foo/bar
                                 :version "1.2.{{git/commit-count}}"})))
@@ -156,24 +158,32 @@
 (t/deftest deploy-test
   (t/testing "normal"
     (let [deploy-arg (atom nil)]
-      (with-redefs [sut/getenv #(case %
-                                  "CLOJARS_USERNAME" "alice"
-                                  "CLOJARS_PASSWORD" "password"
-                                  nil)
+      (with-redefs [be.repo/getenv #(case %
+                                      "CLOJARS_USERNAME" "alice"
+                                      "CLOJARS_PASSWORD" "password"
+                                      nil)
+                    be.repo/has-settings-security-xml? (constantly false)
+                    deps.u.maven/get-settings (constantly nil)
                     b/git-count-revs (constantly "3")
                     sut/jar (constantly "./target/dummy.jar")
                     deploy/deploy (fn [m] (reset! deploy-arg m))]
         (t/is (some? (sut/deploy {:lib 'foo/bar :version "1.2.{{git/commit-count}}"}))))
       (t/is (= {:artifact "./target/dummy.jar"
                 :installer :remote
-                :pom-file "./target/classes/META-INF/maven/foo/bar/pom.xml"}
+                :pom-file "./target/classes/META-INF/maven/foo/bar/pom.xml"
+                :repository {"clojars" {:id "clojars"
+                                        :username "alice"
+                                        :password "password"
+                                        :url "https://repo.clojars.org/"}}}
                @deploy-arg))))
 
   (t/testing "github-actions?"
-    (with-redefs [sut/getenv #(case %
-                                "CLOJARS_USERNAME" "alice"
-                                "CLOJARS_PASSWORD" "password"
-                                nil)
+    (with-redefs [be.repo/getenv #(case %
+                                    "CLOJARS_USERNAME" "alice"
+                                    "CLOJARS_PASSWORD" "password"
+                                    nil)
+                  be.repo/has-settings-security-xml? (constantly false)
+                  deps.u.maven/get-settings (constantly nil)
                   b/git-count-revs (constantly "3")
                   sut/jar (constantly "./target/dummy.jar")
                   deploy/deploy (constantly nil)]
@@ -183,12 +193,13 @@
         (t/is (= ret "1.2.3")))))
 
   (t/testing "validation error"
-    (t/is (thrown-with-msg? AssertionError #"CLOJARS_USERNAME and CLOJARS_PASSWORD are required"
-            (sut/deploy {:lib 'foo/bar :version "1"})))
-    (with-redefs [sut/getenv #(case %
-                                "CLOJARS_USERNAME" "alice"
-                                "CLOJARS_PASSWORD" "password"
-                                nil)]
+
+    (with-redefs [be.repo/getenv #(case %
+                                    "CLOJARS_USERNAME" "alice"
+                                    "CLOJARS_PASSWORD" "password"
+                                    nil)
+                  be.repo/has-settings-security-xml? (constantly false)
+                  deps.u.maven/get-settings (constantly nil)]
       (t/is (thrown-with-msg? ExceptionInfo #"Invalid config"
               (sut/deploy {}))))))
 
