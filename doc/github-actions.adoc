@@ -1,0 +1,82 @@
+= GitHub Actions
+
+When you set `true` to `:github-actions?` in `build.edn` file, build.edn will set following outputs.
+
+[cols="2,2,6"]
+|===
+| Function | Output | Description
+
+| pom
+| `${{ steps.ID.outputs.pom  }}`
+| Path for the pom.xml file
+
+| jar
+| `${{ steps.ID.outputs.jar }}`
+| Path for the generated JAR file
+
+| uberjar
+| `${{ steps.ID.outputs.uberjar }}`
+| Path for the generated standalone JAR file
+
+| install
+| `${{ steps.ID.outputs.version }}`
+| Installed version string
+
+| deploy
+| `${{ steps.ID.outputs.version }}`
+| Deployed version string
+
+| update-documents
+| `${{ steps.ID.outputs.version }}`
+| Tagged version string
+
+|===
+
+
+== Automate your release process
+
+If you'd like to automate your release process with GitHub Actions, it is good to refer following examples:
+
+* https://github.com/liquidz/merr/blob/b4676c8cebc941de8581969f82734ef3d1674de0/.github/workflows/release.yml#L28-L43[liquidz/merr -- .github/workflows/release.yml].
+* https://github.com/liquidz/antq/blob/1144b5ed0bb6b16ff3d08074a163bf99ac0a8926/.github/workflows/release.yml#L36-L60[liquidz/antq -- .github/workflows/release.yml]
+
+
+=== merr's Example
+
+[source,yaml]
+----
+name: Tag and Release
+on: workflow_dispatch
+
+jobs:
+  tag-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          # NOTE: Fetch all for counting commits
+          fetch-depth: 0
+
+      # ... abbreviation ...
+
+      - name: deploy to clojars
+        # NOTE: Specify ID to refer outputs from other steps
+        id: deploy
+        run: clojure -T:build deploy
+        env:
+          CLOJARS_PASSWORD: ${{secrets.CLOJARS_PASSWORD}}
+          CLOJARS_USERNAME: ${{secrets.CLOJARS_USERNAME}}
+
+      - uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # NOTE: Refer outputs
+          tag_name: ${{ steps.deploy.outputs.version }}
+          release_name: ${{ steps.deploy.outputs.version }}
+          body: released
+          draft: false
+          prerelease: false
+----
+
+

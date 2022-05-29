@@ -1,0 +1,31 @@
+= deploy-repository
+
+[cols="1,1,1,1,6a"]
+|===
+| name | type | required? | default | description
+
+| id
+| `string?`
+| Yes
+| "clojars"
+| Used to detect a server from "~/.m2/settings.xml".
+
+| username
+| `string?`
+|
+|
+|
+
+| password
+| `string?`
+|
+|
+|
+
+| url
+| `string?`
+|
+| "https://repo.clojars.org/" for "clojars" `:id`
+|
+
+|===

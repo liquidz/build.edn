@@ -14,7 +14,9 @@ image:https://github.com/liquidz/build.edn/workflows/test/badge.svg["GitHub Acti
 image:https://github.com/liquidz/build.edn/workflows/lint/badge.svg["GitHub Actions for lint workflow", link="https://github.com/liquidz/build.edn/actions?query=workflow%3Alint"]
 image:https://github.com/liquidz/build.edn/workflows/dependencies/badge.svg["GitHub Actions for dependencies workflow", link="https://github.com/liquidz/build.edn/actions?query=workflow%3Adependencies"]
 
-== Getting started
+== Usage
+
+=== Getting started
 
 build.edn make you buildable your libraries only preparing `build.edn` file for the simple usage.
 
@@ -42,41 +44,17 @@ build.edn make you buildable your libraries only preparing `build.edn` file for 
 +
 [source,bash]
 ----
+# Generate JAR file
+$ clojure -T:build jar
+
 # Install lib to your local maven repo
 $ clojure -T:build install
 
 # Deploy to clojars.org
-# CLOJARS_USERNAME and CLOJARS_PASSWORD environmental variables are required
+# Some kind of credentials are required
 $ clojure -T:build deploy
 ----
-
-== API
-=== build-edn.main
-
-`build-edn.main` namespace provides following functions:
-
-|====
-| Function | Description
-
-| pom
-| Generate pom.xml
-
-| jar
-| Generate JAR file
-
-| uberjar
-| Generate standalone JAR file
-
-| install
-| Install to local Maven repository
-
-| deploy
-| Deploy to https://clojars.org
-
-| update-documents
-| Update document files for new release
-
-|====
+** See `clojure -T:build help` for other functionarities.
 
 === Manual usage
 
@@ -113,9 +91,7 @@ So if you want to tune the build process a bit more, you can use `build-edn.core
 ----
 
 
-== Configuration
-
-=== build.edn
+== build.edn file format
 
 [cols="1,1,1,1,6a"]
 |===
@@ -167,87 +143,36 @@ So if you want to tune the build process a bit more, you can use `build-edn.core
 | `map?`
 |
 |
-| You can generate pom.xml with https://maven.apache.org/scm/maven-scm-plugin/usage.html[scm] section.
-
-!===
-! name ! type
-
-! connection ! string?
-! developerConnection ! string?
-! url ! string?
-!===
+| You can generate pom.xml with https://maven.apache.org/scm/maven-scm-plugin/usage.html[scm] section. +
+See link:./doc/format/scm.adoc[doc/format/scm.adoc] for more details.
 
 | documents
 | `sequential?`
 |
 |
-| Required only for `update-documents`
+| Required only for `update-documents`. +
+See link:./doc/format/documents.adoc[doc/format/documents.adoc] for more details.
 
-!===
-! name ! type
+| deploy-repository
+| `map?`
+|
+|
+| Required only for `deploy`. +
+See link:./doc/format/deploy-repository.adoc[doc/format/deploy-repository.adoc] for more details.
 
-! file ! string?
-! match ! string?
-! action ! enum `:append-before`, `:replace`, `:append-after`
-! text ! string?
-
-!===
 
 | github-actions?
 | `boolean?`
 |
 | false
-| See `GitHub Actions` section below for more information
+| See link:./doc/github-actions.adoc[doc/github-actions.adoc] for more details.
 
 |===
 
 
 === Available variables
 
-|===
-| Name | Available parameters | Description
-
-| `{{git/commit-count}}`
-| `version`, `text` in `documents`
-|
-
-| `{{git/head-long-sha}}`
-| `version`, `text` in `documents`
-|
-
-| `{{git/head-short-sha}}`
-| `version`, `text` in `documents`
-|
-
-| `{{now/yyyy}}`
-| `version`, `text` in `documents`
-| year-of-era
-
-| `{{now/mm}}`
-| `version`, `text` in `documents`
-| month-of-year
-
-| `{{now/m}}`
-| `version`, `text` in `documents`
-| month-of-year
-
-| `{{now/dd}}`
-| `version`, `text` in `documents`
-| day-of-month
-
-| `{{now/d}}`
-| `version`, `text` in `documents`
-| day-of-month
-
-| `{{version}}`
-| `text` in `documents`
-|
-
-| `{{lib}}`
-| `jar-file`, `uber-file`
-|
-
-|===
+See link:./doc/format/variables.adoc[doc/format/variables.adoc].
 
 === Lint your build.edn
 
@@ -260,46 +185,14 @@ When you use `:ns-default build-edn.main` setting, you can lint your `build.edn`
 clojure -T:build lint
 ----
 
+== Deploy repositories / credentials
+
+See link:./doc/deploy.adoc[doc/deploy.adoc] for more details.
+
 == GitHub Actions
 
-When you set `true` to `:github-actions?`, build.edn will set following outputs.
-
-[cols="2,2,6"]
-|===
-| Function | Output | Description
-
-| pom
-| `${{ steps.ID.outputs.pom  }}`
-| Path for the pom.xml file
-
-| jar
-| `${{ steps.ID.outputs.jar }}`
-| Path for the generated JAR file
-
-| uberjar
-| `${{ steps.ID.outputs.uberjar }}`
-| Path for the generated standalone JAR file
-
-| install
-| `${{ steps.ID.outputs.version }}`
-| Installed version string
-
-| deploy
-| `${{ steps.ID.outputs.version }}`
-| Deployed version string
-
-| update-documents
-| `${{ steps.ID.outputs.version }}`
-| Tagged version string
-
-|===
-
-=== Automate your release process
-
-If you'd like to automate your release process with GitHub Actions, it is good to refer following examples:
-
-* https://github.com/liquidz/merr/blob/b4676c8cebc941de8581969f82734ef3d1674de0/.github/workflows/release.yml#L28-L43[liquidz/merr - .github/workflows/release.yml].
-* https://github.com/liquidz/antq/blob/1144b5ed0bb6b16ff3d08074a163bf99ac0a8926/.github/workflows/release.yml#L36-L60[liquidz/antq - .github/workflows/release.yml]
+If you'd like to integrate build.edn with GitHub Actions,
+see link:./doc/github-actions.adoc[doc/github-actions.adoc].
 
 == Projects using build.edn
 

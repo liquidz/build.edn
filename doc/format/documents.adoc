@@ -1,0 +1,31 @@
+= documents
+
+[cols="1,1,1,6a"]
+|===
+| name | type | required? | description
+
+| file
+| `string?`
+| Yes
+| Document file path to update
+
+| match
+| `string?`
+| Yes
+| Regexp for matching base line in the `:file`
+
+| action
+| `:append-before`, `:replace`  or `:append-after`
+| Yes
+| Action type.
+
+- `append-before` -- Append `:text` before the base line
+- `replace` -- Replace the base line by `:text`
+- `append-after` -- Append `:text` after the base line
+
+| text
+| `string?`
+| Yes
+| Text handled by `:action`
+
+|====
