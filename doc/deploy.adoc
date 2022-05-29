@@ -11,14 +11,19 @@ The default pair of `:id` and URL is below.
 - `"central"` -- https://repo1.maven.org/maven2/
 - `"clojars"` -- https://repo.clojars.org/
 
-Other custom URLs could be defined by https://clojure.org/reference/deps_and_cli#_maven[mvn/repos] in deps.edn file.
+Other custom URLs could be defined by https://clojure.org/reference/deps_and_cli#_maven[mvn/repos] in `deps.edn` file or `build.edn` explicitly.
 
+=== deps.edn
 [source,clojure]
 ----
 {:mvn/repos {"custom-id" {:url "https://custom.example.com"}}}
 ----
 
-
+=== build.edn
+[source,clojure]
+----
+{:deploy-repository {:url "https://custom.example.com"}}
+----
 
 == Credentials
 

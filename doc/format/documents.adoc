@@ -1,5 +1,7 @@
 = documents
 
+`:documents` key in `build.edn` file shoud be a sequence of the following map.
+
 [cols="1,1,1,6a"]
 |===
 | name | type | required? | description
