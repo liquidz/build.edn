@@ -1,12 +1,11 @@
 (ns build-edn.main
   (:require
-   [build-edn.core :as core]
-   [clojure.edn :as edn]))
+   [aero.core :as aero]
+   [build-edn.core :as core]))
 
 (defn- load-config
   []
-  (-> (slurp "build.edn")
-      (edn/read-string)))
+  (aero/read-config "build.edn"))
 
 (defn pom
   [m]
