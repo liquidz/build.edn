@@ -1,6 +1,8 @@
 All notable changes to this project will be documented in this file. This change log follows the conventions of http://keepachangelog.com/[keepachangelog.com].
 
 == Unreleased (dev)
+
+== 0.3.82 (2022-05-29)
 // {{{
 === Added
 * https://github.com/liquidz/build.edn/issues/3[#3]: Added `:deploy-repository` key to `build.edn` file.

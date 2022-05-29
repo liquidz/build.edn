@@ -35,7 +35,7 @@ build.edn make you buildable your libraries only preparing `build.edn` file for 
 [source,clojure]
 ----
 {:aliases
- {:build {:deps {com.github.liquidz/build.edn {:git/tag "0.2.63" :git/sha "f4e571d"}}
+ {:build {:deps {com.github.liquidz/build.edn {:git/tag "0.3.82" :git/sha "a4a8f70"}}
           :ns-default build-edn.main}}}
 ----
 
@@ -67,7 +67,7 @@ So if you want to tune the build process a bit more, you can use `build-edn.core
 [source,clojure]
 ----
 {:aliases
- {:build {:deps {com.github.liquidz/build.edn {:git/tag "0.2.63" :git/sha "f4e571d"}}
+ {:build {:deps {com.github.liquidz/build.edn {:git/tag "0.3.82" :git/sha "a4a8f70"}}
           :ns-default build}}}
 ----
 * build.clj
