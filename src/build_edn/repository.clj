@@ -42,7 +42,7 @@
 (defn- url-by-id
   [server-id]
   (-> deps.u.maven/standard-repos
-      (merge (:men-repos (deps-edn-maps)))
+      (merge (:mvn/repos (deps-edn-maps)))
       (get server-id {})))
 
 (defn repository-by-id
