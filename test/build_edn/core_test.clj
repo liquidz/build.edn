@@ -6,7 +6,6 @@
    [clojure.string :as str]
    [clojure.test :as t]
    [clojure.tools.build.api :as b]
-   [clojure.tools.deps.alpha.util.maven :as deps.u.maven]
    [deps-deploy.deps-deploy :as deploy])
   (:import
    clojure.lang.ExceptionInfo))
@@ -155,15 +154,19 @@
     (t/is (thrown-with-msg? ExceptionInfo #"Invalid config"
             (sut/install {})))))
 
+(be.repo/repository-by-id "neko")
+(defn- dummy-repository-by-id
+  [id]
+  {id (merge {:id id}
+             (when (= "clojars" id)
+               {:username "alice"
+                :password "password"
+                :url "https://repo.clojars.org/"}))})
+
 (t/deftest deploy-test
   (t/testing "normal"
     (let [deploy-arg (atom nil)]
-      (with-redefs [be.repo/getenv #(case %
-                                      "CLOJARS_USERNAME" "alice"
-                                      "CLOJARS_PASSWORD" "password"
-                                      nil)
-                    be.repo/has-settings-security-xml? (constantly false)
-                    deps.u.maven/get-settings (constantly nil)
+      (with-redefs [be.repo/repository-by-id dummy-repository-by-id
                     b/git-count-revs (constantly "3")
                     sut/jar (constantly "./target/dummy.jar")
                     deploy/deploy (fn [m] (reset! deploy-arg m))]
@@ -178,12 +181,7 @@
                @deploy-arg))))
 
   (t/testing "github-actions?"
-    (with-redefs [be.repo/getenv #(case %
-                                    "CLOJARS_USERNAME" "alice"
-                                    "CLOJARS_PASSWORD" "password"
-                                    nil)
-                  be.repo/has-settings-security-xml? (constantly false)
-                  deps.u.maven/get-settings (constantly nil)
+    (with-redefs [be.repo/repository-by-id dummy-repository-by-id
                   b/git-count-revs (constantly "3")
                   sut/jar (constantly "./target/dummy.jar")
                   deploy/deploy (constantly nil)]
@@ -193,13 +191,7 @@
         (t/is (= ret "1.2.3")))))
 
   (t/testing "validation error"
-
-    (with-redefs [be.repo/getenv #(case %
-                                    "CLOJARS_USERNAME" "alice"
-                                    "CLOJARS_PASSWORD" "password"
-                                    nil)
-                  be.repo/has-settings-security-xml? (constantly false)
-                  deps.u.maven/get-settings (constantly nil)]
+    (with-redefs [be.repo/repository-by-id dummy-repository-by-id]
       (t/is (thrown-with-msg? ExceptionInfo #"Invalid config"
               (sut/deploy {}))))))
 
