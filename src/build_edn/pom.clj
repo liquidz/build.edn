@@ -41,10 +41,11 @@
   ([git-dir]
    (let [git-config-path (io/file git-dir "config")
          url (git-remote-origin-url git-config-path)
-         domain (condp #(str/includes? %2 %1) url
-                  "github.com" "github.com"
-                  "gitlab.com" "gitlab.com"
-                  nil)
+         domain (when url
+                  (condp #(str/includes? %2 %1) url
+                    "github.com" "github.com"
+                    "gitlab.com" "gitlab.com"
+                    nil))
          user-repo (when domain (extract-user-and-repository domain url))]
      (when user-repo
        (scm-map domain user-repo)))))

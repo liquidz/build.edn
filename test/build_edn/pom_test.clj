@@ -40,3 +40,7 @@
 (t/deftest generate-scm-from-git-dir-unknown-test
   (with-redefs [sut/git-remote-origin-url (constantly "https://example.com/foo/bar.git")]
     (t/is (nil? (sut/generate-scm-from-git-dir)))))
+
+(t/deftest generate-scm-from-git-dir-failure-test
+  (with-redefs [slurp (fn [& _] (throw (ex-info "test" {})))]
+    (t/is (nil? (sut/generate-scm-from-git-dir)))))
