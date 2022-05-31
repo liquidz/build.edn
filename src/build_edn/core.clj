@@ -35,11 +35,12 @@
                      (and (:version arg)
                           (str/includes? (:version arg) "{{"))
                      (update :version #(pg/render-string % render-data)))
+            config (if-let [scm (and (not (contains? config :scm))
+                                     (be.pom/generate-scm-from-git-dir))]
+                     (assoc config :scm scm)
+                     config)
             config (cond-> config
-                     (not (contains? config :scm))
-                     (assoc :scm (be.pom/generate-scm-from-git-dir))
-
-                     :always
+                     (contains? config :scm)
                      (assoc-in [:scm :tag] (:version config)))]
         (merge default-configs config))))
 
