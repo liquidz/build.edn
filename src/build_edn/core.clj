@@ -1,5 +1,6 @@
 (ns build-edn.core
   (:require
+   [build-edn.pom :as be.pom]
    [build-edn.repository :as be.repo]
    [build-edn.schema :as be.schema]
    [build-edn.variable :as be.var]
@@ -35,7 +36,10 @@
                           (str/includes? (:version arg) "{{"))
                      (update :version #(pg/render-string % render-data)))
             config (cond-> config
-                     (contains? config :scm)
+                     (not (contains? config :scm))
+                     (assoc :scm (be.pom/generate-scm-from-git-dir))
+
+                     :always
                      (assoc-in [:scm :tag] (:version config)))]
         (merge default-configs config))))
 

@@ -27,17 +27,24 @@
               :uber-file "target/{{lib}}-standalone.jar"
               :class-dir "target/classes"
               :deploy-repository {:id "clojars"}
+              :scm {:connection "scm:git:git://github.com/liquidz/build.edn.git"
+                    :developerConnection "scm:git:ssh://git@github.com/liquidz/build.edn.git"
+                    :url "https://github.com/liquidz/build.edn"
+                    :tag "1.2.3"}
               :github-actions? false}
              (#'sut/gen-config {:lib 'foo/bar
                                 :version "1.2.{{git/commit-count}}"})))
 
-    (t/testing "scm"
-      (t/is (contains? (#'sut/gen-config {:lib 'foo/bar
-                                          :version "1.2.{{git/commit-count}}"
-                                          :scm {:connection "a"
-                                                :developerConnection "b"
-                                                :url "c"}})
-                       :scm)))))
+    (t/testing "custom scm"
+      (t/is (= {:connection "a"
+                :developerConnection "b"
+                :url "c"
+                :tag "1.2.3"}
+               (:scm (#'sut/gen-config {:lib 'foo/bar
+                                        :version "1.2.{{git/commit-count}}"
+                                        :scm {:connection "a"
+                                              :developerConnection "b"
+                                              :url "c"}})))))))
 
 (t/deftest pom-test
   (t/testing "normal"
