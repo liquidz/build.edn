@@ -1,6 +1,11 @@
 All notable changes to this project will be documented in this file. This change log follows the conventions of http://keepachangelog.com/[keepachangelog.com].
 
 == Unreleased (dev)
+// {{{
+=== Changed
+* https://github.com/liquidz/build.edn/issues/1[#1]: Updated `:scm` to be able to collect from `.git/config` automatically.
+** Of course, you can overwrite it from `build.edn` file if you want.
+// }}}
 
 == 0.3.82 (2022-05-29)
 // {{{

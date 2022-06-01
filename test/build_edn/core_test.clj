@@ -1,6 +1,7 @@
 (ns build-edn.core-test
   (:require
    [build-edn.core :as sut]
+   [build-edn.pom :as be.pom]
    [build-edn.repository :as be.repo]
    [build-edn.variable :as be.var]
    [clojure.string :as str]
@@ -27,17 +28,30 @@
               :uber-file "target/{{lib}}-standalone.jar"
               :class-dir "target/classes"
               :deploy-repository {:id "clojars"}
+              :scm {:connection "scm:git:git://github.com/liquidz/build.edn.git"
+                    :developerConnection "scm:git:ssh://git@github.com/liquidz/build.edn.git"
+                    :url "https://github.com/liquidz/build.edn"
+                    :tag "1.2.3"}
               :github-actions? false}
              (#'sut/gen-config {:lib 'foo/bar
                                 :version "1.2.{{git/commit-count}}"})))
 
-    (t/testing "scm"
-      (t/is (contains? (#'sut/gen-config {:lib 'foo/bar
-                                          :version "1.2.{{git/commit-count}}"
-                                          :scm {:connection "a"
-                                                :developerConnection "b"
-                                                :url "c"}})
-                       :scm)))))
+    (t/testing "custom scm"
+      (t/is (= {:connection "a"
+                :developerConnection "b"
+                :url "c"
+                :tag "1.2.3"}
+               (:scm (#'sut/gen-config {:lib 'foo/bar
+                                        :version "1.2.{{git/commit-count}}"
+                                        :scm {:connection "a"
+                                              :developerConnection "b"
+                                              :url "c"}})))))
+
+    (t/testing "failed to generate scm"
+      (with-redefs [be.pom/generate-scm-from-git-dir (constantly nil)]
+        (t/is (not (contains? (#'sut/gen-config {:lib 'foo/bar
+                                                 :version "1.2.{{git/commit-count}}"})
+                              :scm)))))))
 
 (t/deftest pom-test
   (t/testing "normal"
@@ -48,7 +62,11 @@
       (t/is (= {:lib 'foo/bar
                 :version "1.2.3"
                 :class-dir "target/classes"
-                :src-dirs ["src"]}
+                :src-dirs ["src"]
+                :scm {:connection "scm:git:git://github.com/liquidz/build.edn.git"
+                      :developerConnection "scm:git:ssh://git@github.com/liquidz/build.edn.git"
+                      :url "https://github.com/liquidz/build.edn"
+                      :tag "1.2.3"}}
                (dissoc @write-pom-arg :basis)))))
 
   (t/testing "github-actions?"
@@ -220,6 +238,7 @@
                                             :match ".ar"
                                             :action :replace
                                             :text "hello {{git/head-short-sha}}"}]})
+
         (t/is (= {"append_before.txt" "foo\nhello 1.2.3 2112-09-03\nbar\nbaz"
                   "append_after.txt" "foo\nbar\nhello long-sha\nbaz"
                   "replace.txt" "foo\nhello short-sha\nbaz"}

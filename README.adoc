@@ -144,6 +144,7 @@ So if you want to tune the build process a bit more, you can use `build-edn.core
 |
 |
 | You can generate pom.xml with https://maven.apache.org/scm/maven-scm-plugin/usage.html[scm] section. +
+If you don't specify this key, build.edn will collect it from `.git/config` automatically. +
 See link:./doc/format/scm.adoc[doc/format/scm.adoc] for more details.
 
 | documents
