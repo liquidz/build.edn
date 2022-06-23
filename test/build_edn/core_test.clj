@@ -237,11 +237,15 @@
                                            {:file "replace.txt"
                                             :match ".ar"
                                             :action :replace
-                                            :text "hello {{git/head-short-sha}}"}]})
-
+                                            :text "hello {{git/head-short-sha}}"}
+                                           {:file "version.txt"
+                                            :match "bar"
+                                            :action :replace
+                                            :text "{{version/patch}}/{{version/minor}}/{{version/major}}"}]})
         (t/is (= {"append_before.txt" "foo\nhello 1.2.3 2112-09-03\nbar\nbaz"
                   "append_after.txt" "foo\nbar\nhello long-sha\nbaz"
-                  "replace.txt" "foo\nhello short-sha\nbaz"}
+                  "replace.txt" "foo\nhello short-sha\nbaz"
+                  "version.txt" "foo\n3/2/1\nbaz"}
                  @updated)))))
 
   (t/testing "tailing with blanks"
