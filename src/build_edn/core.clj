@@ -72,7 +72,7 @@
 
 (defn pom
   [arg]
-  (let [config (gen-config arg)
+  (let [{:as config :keys [description]} (gen-config arg)
         _ (validate-config! config)
         basis (get-basis arg)
         pom-path (b/pom-path config)]
@@ -81,6 +81,12 @@
         (assoc :basis basis
                :src-dirs (get-src-dirs config basis))
         (b/write-pom))
+
+    (when description
+      (-> (slurp pom-path)
+          (be.pom/add-description description)
+          (->> (spit pom-path))))
+
     (set-gha-output config "pom" pom-path)
     pom-path))
 
