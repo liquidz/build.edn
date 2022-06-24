@@ -1,5 +1,6 @@
 {:paths ["src"]
  :deps {org.clojure/clojure {:mvn/version "1.11.1"}
+        org.clojure/data.xml {:mvn/version "0.2.0-alpha6"}
         io.github.clojure/tools.build {:git/tag "v0.8.2" :git/sha "ba1a2bf"}
         metosin/malli {:mvn/version "0.8.8"}
         slipset/deps-deploy {:mvn/version "0.2.0"}
