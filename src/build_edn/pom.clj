@@ -1,7 +1,9 @@
 (ns build-edn.pom
   (:require
+   [clojure.data.xml :as xml]
    [clojure.java.io :as io]
-   [clojure.string :as str]))
+   [clojure.string :as str]
+   [clojure.zip :as zip]))
 
 (defn- remote-origin-url-regexps
   [domain]
@@ -49,3 +51,48 @@
          user-repo (when domain (extract-user-and-repository domain url))]
      (when user-repo
        (scm-map domain user-repo)))))
+
+(defn- directly-under-project?
+  [loc]
+  (if-let [parent-tag (:tag (zip/node (zip/up loc)))]
+    (= "project" (name parent-tag))
+    false))
+
+(defn- contains-tag-directly-under-project?
+  [loc target-tag-name]
+  (loop [loc loc]
+    (if (and loc (zip/end? loc))
+      false
+      (let [tag (:tag (zip/node loc))]
+        (if (and tag
+                 (= target-tag-name (name tag))
+                 (directly-under-project? loc))
+          true
+          (recur (zip/next loc)))))))
+
+(defn- add-new-tag-before-name-tag
+  [^String pom-content ^String new-tag-name ^String new-tag-content]
+  (let [loc (-> (.getBytes pom-content)
+                (io/input-stream)
+                (xml/parse :skip-whitespace true)
+                (zip/xml-zip))]
+    (if (contains-tag-directly-under-project? loc new-tag-name)
+      pom-content
+      (loop [loc loc]
+        (if (and loc (zip/end? loc))
+          (-> loc
+              (zip/root)
+              (xml/indent-str))
+          (let [{:as node :keys [tag]} (zip/node loc)]
+            (if (and tag
+                     (= "name" (name tag))
+                     (directly-under-project? loc))
+              (let [new-node (-> node
+                                 (update :tag #(keyword (namespace %) new-tag-name))
+                                 (assoc :content [new-tag-content]))]
+                (recur (zip/next (zip/insert-left loc new-node))))
+              (recur (zip/next loc)))))))))
+
+(defn add-description
+  [^String pom-content ^String description]
+  (add-new-tag-before-name-tag pom-content "description" description))
