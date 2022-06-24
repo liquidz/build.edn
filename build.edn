@@ -1,9 +1,6 @@
 {:lib com.github.liquidz/build.edn
  :version "0.3.{{git/commit-count}}"
- :scm {:connection "scm:git:git://github.com/liquidz/build.edn.git"
-       :developerConnection "scm:git:ssh://git@github.com/liquidz/build.edn.git"
-       :url "https://github.com/liquidz/build.edn"}
-
+ :description "Make your Clojure library build process easy"
  :documents [{:file "CHANGELOG.adoc"
               :match "Unreleased"
               :action :append-after
