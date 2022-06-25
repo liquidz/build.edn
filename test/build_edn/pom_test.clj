@@ -1,6 +1,7 @@
 (ns build-edn.pom-test
   (:require
    [build-edn.pom :as sut]
+   [clojure.string :as str]
    [clojure.test :as t]))
 
 (t/deftest generate-scm-from-git-dir-github-test
@@ -44,3 +45,38 @@
 (t/deftest generate-scm-from-git-dir-failure-test
   (with-redefs [slurp (fn [& _] (throw (ex-info "test" {})))]
     (t/is (nil? (sut/generate-scm-from-git-dir)))))
+
+(defn- normalize-pom
+  [s]
+  (-> s
+      (str/replace #"\n\s*" "")
+      (str/replace "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" "")))
+
+(t/deftest add-description-test
+  (let [dummy-pom "<project>
+                     <name>dummy</name>
+                   </project>"]
+    (t/is (= (-> "<project>
+                    <description>hello</description>
+                    <name>dummy</name>
+                  </project>"
+                 (normalize-pom))
+             (-> dummy-pom
+                 (sut/add-description "hello")
+                 (normalize-pom))))
+
+    (t/testing "no duplicates"
+      (t/is (= (-> "<project>
+                    <description>world</description>
+                    <name>dummy</name>
+                  </project>"
+                   (normalize-pom))
+               (-> dummy-pom
+                   (sut/add-description "world")
+                   ;; description tag already exists
+                   (sut/add-description "hello")
+                   (normalize-pom)))))
+
+    (t/testing "no name tag"
+      (t/is (= "<a/>"
+               (normalize-pom (sut/add-description "<a/>" "foo")))))))

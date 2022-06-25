@@ -10,6 +10,7 @@
   [:map
    [:lib qualified-symbol?]
    [:version string?]
+   [:description {:optional true} string?]
    [:source-dir {:optional true} string?]
    [:class-dir {:optional true} string?]
    [:jar-file {:optional true} string?]

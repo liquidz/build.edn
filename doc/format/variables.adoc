@@ -1,46 +1,48 @@
 = Available variables
 
 |===
-| Name | Available parameters | Description
+| Name | Description
 
 | `{{git/commit-count}}`
-| `version`, `text` in `documents`
-|
+| Total commit count on your repository.
 
 | `{{git/head-long-sha}}`
-| `version`, `text` in `documents`
-|
+| Long SHA for `^HEAD` on your repository. +
+e.g. `aae3588beaa9c8a7ed3f855981396b82c20790a0`
+
 
 | `{{git/head-short-sha}}`
-| `version`, `text` in `documents`
-|
+| Short SHA for `^HEAD` on your repository. +
+e.g. `aae3588`
 
 | `{{now/yyyy}}`
-| `version`, `text` in `documents`
-| year-of-era
+| Year of era.
 
 | `{{now/mm}}`
-| `version`, `text` in `documents`
-| month-of-year
+| Month of year.
 
 | `{{now/m}}`
-| `version`, `text` in `documents`
-| month-of-year
+| Month of year.
 
 | `{{now/dd}}`
-| `version`, `text` in `documents`
-| day-of-month
+| Day of month with zero-padding.
 
 | `{{now/d}}`
-| `version`, `text` in `documents`
-| day-of-month
+| Day of month.
 
 | `{{version}}`
-| `text` in `documents`
-|
+| Your library's version.
+
+| `{{version/major}}`
+| The `major` part if your library's version is semantic versioning(`major`.`minor`.`patch`).
+
+| `{{version/minor}}`
+| The `minor` part if your library's version is semantic versioning(`major`.`minor`.`patch`).
+
+| `{{version/patch}}`
+| The `patch` part if your library's version is semantic versioning(`major`.`minor`.`patch`).
 
 | `{{lib}}`
-| `jar-file`, `uber-file`
-|
+| Your library name.
 
 |===

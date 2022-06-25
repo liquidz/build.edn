@@ -4,6 +4,7 @@
    [build-edn.repository :as be.repo]
    [build-edn.schema :as be.schema]
    [build-edn.variable :as be.var]
+   [build-edn.version :as be.ver]
    [clojure.string :as str]
    [clojure.tools.build.api :as b]
    [deps-deploy.deps-deploy :as deploy]
@@ -27,10 +28,19 @@
      (let [m (me/humanize e)]
        (throw (ex-info (str "Invalid config: " m) m))))))
 
+(defn- generate-render-data
+  ([]
+   (generate-render-data {}))
+  ([{:keys [lib version]}]
+   (merge (be.var/variable-map)
+          (and lib {:lib (name lib)})
+          (and version {:version version})
+          (and version (be.ver/parse-semantic-version version)))))
+
 (defn- gen-config
   [arg]
   (or (:config arg)
-      (let [render-data (be.var/variable-map)
+      (let [render-data (generate-render-data)
             config (cond-> arg
                      (and (:version arg)
                           (str/includes? (:version arg) "{{"))
@@ -62,7 +72,7 @@
 
 (defn pom
   [arg]
-  (let [config (gen-config arg)
+  (let [{:as config :keys [description]} (gen-config arg)
         _ (validate-config! config)
         basis (get-basis arg)
         pom-path (b/pom-path config)]
@@ -71,17 +81,23 @@
         (assoc :basis basis
                :src-dirs (get-src-dirs config basis))
         (b/write-pom))
+
+    (when description
+      (-> (slurp pom-path)
+          (be.pom/add-description description)
+          (->> (spit pom-path))))
+
     (set-gha-output config "pom" pom-path)
     pom-path))
 
 (defn jar
   [arg]
-  (let [{:as config :keys [lib class-dir jar-file]} (gen-config arg)
+  (let [{:as config :keys [class-dir jar-file]} (gen-config arg)
         _ (validate-config! config)
         basis (get-basis arg)
         arg (assoc arg :config config :basis basis)
-        render-data {:lib (name lib)}
-        jar-file (pg/render-string jar-file render-data)]
+        jar-file (->> (generate-render-data config)
+                      (pg/render-string jar-file))]
     (pom arg)
     (b/copy-dir {:src-dirs (get-src-dirs config basis)
                  :target-dir class-dir})
@@ -92,14 +108,14 @@
 
 (defn uberjar
   [arg]
-  (let [{:as config :keys [lib class-dir uber-file main]} (gen-config arg)
+  (let [{:as config :keys [class-dir uber-file main]} (gen-config arg)
         ?schema (mu/merge be.schema/?build-config be.schema/?uber-build-config)
         _ (validate-config! ?schema config)
         basis (get-basis arg)
         src-dirs (get-src-dirs config basis)
         arg (assoc arg :config config :basis basis)
-        render-data {:lib (name lib)}
-        uber-file (pg/render-string uber-file render-data)]
+        uber-file (->> (generate-render-data config)
+                       (pg/render-string uber-file))]
     (pom arg)
     (b/copy-dir {:src-dirs src-dirs
                  :target-dir class-dir})
@@ -156,13 +172,13 @@
                     (str/join "\n"))]
     (str result tail-blanks)))
 
+
 (defn update-documents
   [arg]
   (let [{:as config :keys [version documents]} (gen-config arg)
         ?schema (mu/merge be.schema/?build-config be.schema/?documents-build-config)
         _ (validate-config! ?schema config)
-        render-data (assoc (be.var/variable-map)
-                           :version version)]
+        render-data (generate-render-data config)]
     (doseq [{:keys [file match action text]} documents
             :let [regexp (re-pattern match)
                   text (pg/render-string text render-data)]]
