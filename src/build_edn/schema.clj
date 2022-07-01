@@ -23,11 +23,16 @@
    [:main symbol?]])
 
 (def ?document
-  [:map
-   [:file string?]
-   [:match string?]
-   [:action [:enum :append-before :replace :append-after]]
-   [:text string?]])
+  [:or
+   [:map
+    [:file string?]
+    [:match string?]
+    [:action [:enum :append-before :replace :append-after]]
+    [:text string?]]
+   [:map
+    [:file string?]
+    [:action [:enum :create]]
+    [:text string?]]])
 
 (def ?documents-build-config
   [:map
