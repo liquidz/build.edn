@@ -172,7 +172,6 @@
                     (str/join "\n"))]
     (str result tail-blanks)))
 
-
 (defn update-documents
   [arg]
   (let [{:as config :keys [version documents]} (gen-config arg)
@@ -180,17 +179,20 @@
         _ (validate-config! ?schema config)
         render-data (generate-render-data config)]
     (doseq [{:keys [file match action text]} documents
-            :let [regexp (re-pattern match)
+            :let [regexp (when (string? match)
+                           (re-pattern match))
                   text (pg/render-string text render-data)]]
-      (->> (slurp file)
-           (update-line (fn [[line]]
-                          (if (re-find regexp line)
-                            (case action
-                              :append-before [text line]
-                              :append-after [line text]
-                              [text])
-                            [line])))
-           (spit file)))
+      (if (= :create action)
+        (spit file text)
+        (->> (slurp file)
+             (update-line (fn [[line]]
+                            (if (re-find regexp line)
+                              (case action
+                                :append-before [text line]
+                                :append-after [line text]
+                                [text])
+                              [line])))
+             (spit file))))
     (set-gha-output config "version" version)
     version))
 

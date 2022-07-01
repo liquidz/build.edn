@@ -13,17 +13,18 @@
 
 | match
 | `string?`
-| Yes
+| Yes for actions excepting `create`
 | Regexp for matching base line in the `:file`
 
 | action
-| `:append-before`, `:replace`  or `:append-after`
+| `:append-before`, `:replace`, `:append-after` or `:create`
 | Yes
 | Action type.
 
 - `append-before` -- Append `:text` before the base line
 - `replace` -- Replace the base line by `:text`
 - `append-after` -- Append `:text` after the base line
+- `create` -- Create a new file which has `:text` as contents
 
 | text
 | `string?`

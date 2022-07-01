@@ -241,11 +241,15 @@
                                            {:file "version.txt"
                                             :match "bar"
                                             :action :replace
-                                            :text "{{version/patch}}/{{version/minor}}/{{version/major}}"}]})
+                                            :text "{{version/patch}}/{{version/minor}}/{{version/major}}"}
+                                           {:file "create.txt"
+                                            :action :create
+                                            :text "created-{{version}}"}]})
         (t/is (= {"append_before.txt" "foo\nhello 1.2.3 2112-09-03\nbar\nbaz"
                   "append_after.txt" "foo\nbar\nhello long-sha\nbaz"
                   "replace.txt" "foo\nhello short-sha\nbaz"
-                  "version.txt" "foo\n3/2/1\nbaz"}
+                  "version.txt" "foo\n3/2/1\nbaz"
+                  "create.txt" "created-1.2.3"}
                  @updated)))))
 
   (t/testing "tailing with blanks"
