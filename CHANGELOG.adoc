@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. This change
 // {{{
 === Added
 * Added `create` action for `update-documents` function.
+
+=== Changed
+* Bumped tools.build to v0.8.3.
+* Bumped malli to 0.8.9.
 // }}}
 
 == 0.4.107 (2022-06-25)
