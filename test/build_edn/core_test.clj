@@ -32,6 +32,7 @@
                     :developerConnection "scm:git:ssh://git@github.com/liquidz/build.edn.git"
                     :url "https://github.com/liquidz/build.edn"
                     :tag "1.2.3"}
+              :skip-compiling-dirs #{"resources"}
               :github-actions? false}
              (#'sut/gen-config {:lib 'foo/bar
                                 :version "1.2.{{git/commit-count}}"})))
