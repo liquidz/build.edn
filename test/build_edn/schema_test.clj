@@ -35,12 +35,19 @@
 (t/deftest uber-build-config-test
   (t/testing "truthy"
     (t/is (true? (m/validate sut/?uber-build-config {:uber-file ""
-                                                     :main 'foo}))))
+                                                     :main 'foo
+                                                     :skip-compiling-dirs []})))
+    (t/is (true? (m/validate sut/?uber-build-config {:uber-file ""
+                                                     :main 'foo
+                                                     :skip-compiling-dirs #{}}))))
 
   (t/testing "falsy"
     (t/is (false? (m/validate sut/?uber-build-config {})))
     (t/is (false? (m/validate sut/?uber-build-config {:uber-file 123
-                                                      :main 'foo})))))
+                                                      :main 'foo})))
+    (t/is (false? (m/validate sut/?uber-build-config {:uber-file ""
+                                                      :main 'foo
+                                                      :skip-compiling-dirs {}})))))
 
 (t/deftest document-test
   (t/testing "truthy"

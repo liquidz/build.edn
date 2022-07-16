@@ -32,7 +32,9 @@
 (def ?uber-build-config
   (l/schema
    {:uber-file string?
-    :main symbol?}))
+    :main symbol?
+    :skip-compiling-dirs (l/optional (l/or (sequential string?)
+                                           (l/set string?)))}))
 
 (def ?document
   (l/or
