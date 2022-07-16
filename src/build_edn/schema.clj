@@ -14,9 +14,9 @@
 
 (def ?scm
   (l/schema
-    {:connection string?
-     :developerConnection string?
-     :url string?}))
+   {:connection string?
+    :developerConnection string?
+    :url string?}))
 
 (def ?build-config
   (l/schema
@@ -50,7 +50,7 @@
 
 (def ?documents-build-config
   (l/schema
-    {:documents (sequential ?document)}))
+   {:documents (sequential ?document)}))
 
 (def ?deploy-repository
   (l/schema
