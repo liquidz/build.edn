@@ -119,7 +119,9 @@
                     b/copy-dir (fn [m] (reset! copy-dir-arg m))
                     b/compile-clj (fn [m] (reset! compile-clj-arg m))
                     b/uber (fn [m] (reset! uber-arg m))]
-        (t/is (some? (sut/uberjar {:lib 'foo/bar :version "1.2.{{git/commit-count}}" :main 'bar.core}))))
+        (t/is (some? (sut/uberjar {:lib 'foo/bar
+                                   :version "1.2.{{git/commit-count}}"
+                                   :main 'bar.core}))))
       (t/is (= {:src-dirs ["src"]
                 :target-dir "target/classes"}
                @copy-dir-arg))
@@ -140,6 +142,18 @@
                                 (sut/uberjar {:lib 'foo/bar :version "1" :main 'bar.core :github-actions? true}))]
         (t/is (str/starts-with? out "::set-output name=uberjar::"))
         (t/is (str/includes? out ret)))))
+
+  (t/testing "skip-compiling-dirs"
+    (let [compile-clj-arg (atom nil)]
+      (with-redefs [sut/pom (constantly nil)
+                    b/copy-dir (constantly nil)
+                    b/compile-clj (fn [m] (reset! compile-clj-arg m))
+                    b/uber (constantly nil)]
+        (t/is (some? (sut/uberjar {:lib 'bar/baz
+                                   :version "1.0.0"
+                                   :main 'baz.core
+                                   :skip-compiling-dirs #{"src"}}))))
+      (t/is (= [] (:src-dirs @compile-clj-arg)))))
 
   (t/testing "validation error"
     (t/is (thrown-with-msg? ExceptionInfo #"Invalid config"
