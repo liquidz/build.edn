@@ -70,6 +70,15 @@
                       :tag "1.2.3"}}
                (dissoc @write-pom-arg :basis)))))
 
+  (t/testing "source-dirs"
+    (let [write-pom-arg (atom nil)]
+      (with-redefs [b/write-pom (fn [m] (reset! write-pom-arg m))]
+        (t/is (some? (sut/pom {:lib 'foo/bar
+                               :version "1.2.3"
+                               :source-dirs ["foo" "bar"]}))))
+      (t/is (= ["foo" "bar"]
+               (:src-dirs @write-pom-arg)))))
+
   (t/testing "github-actions?"
     (with-redefs [b/write-pom (constantly nil)]
       (let [{:keys [ret out]} (with-out-str-and-ret
@@ -96,6 +105,18 @@
       (t/is (= {:class-dir "target/classes"
                 :jar-file "target/bar.jar"}
                @jar-arg))))
+
+  (t/testing "source-dirs"
+    (let [copy-dir-arg (atom nil)]
+      (with-redefs [sut/pom (constantly nil)
+                    b/copy-dir (fn [m] (reset! copy-dir-arg m))
+                    b/jar (constantly nil)]
+        (t/is (some? (sut/jar {:lib 'foo/bar
+                               :version "1.2.3"
+                               :source-dirs ["foo" "bar"]}))))
+      (t/is (= {:src-dirs ["foo" "bar"]
+                :target-dir "target/classes"}
+               @copy-dir-arg))))
 
   (t/testing "github-actions?"
     (with-redefs [sut/pom (constantly nil)
@@ -133,6 +154,24 @@
                 :uber-file "target/bar-standalone.jar"
                 :main 'bar.core}
                (dissoc @uber-arg :basis)))))
+
+  (t/testing "source-dirs"
+    (let [copy-dir-arg (atom nil)
+          compile-clj-arg (atom nil)]
+      (with-redefs [sut/pom (constantly nil)
+                    b/copy-dir (fn [m] (reset! copy-dir-arg m))
+                    b/compile-clj (fn [m] (reset! compile-clj-arg m))
+                    b/uber (constantly nil)]
+        (t/is (some? (sut/uberjar {:lib 'foo/bar
+                                   :version "1.2.3"
+                                   :source-dirs ["foo" "bar"]
+                                   :main 'bar.core}))))
+      (t/is (= {:src-dirs ["foo" "bar"]
+                :target-dir "target/classes"}
+               @copy-dir-arg))
+      (t/is (= {:src-dirs ["foo" "bar"]
+                :class-dir "target/classes"}
+               (dissoc @compile-clj-arg :basis)))))
 
   (t/testing "github-actions?"
     (with-redefs [sut/pom (constantly nil)
