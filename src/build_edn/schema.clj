@@ -23,7 +23,8 @@
    {:lib qualified-symbol?
     :version string?
     :description (l/optional string?)
-    :source-dir (l/optional string?)
+    :source-dirs (l/optional (l/or (sequential string?)
+                                   (l/set string?)))
     :class-dir (l/optional string?)
     :jar-file (l/optional string?)
     :scm (l/optional ?scm)

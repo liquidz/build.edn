@@ -63,7 +63,7 @@
 
 (defn- get-src-dirs
   [config basis]
-  (or (:src-dirs config)
+  (or (:source-dirs config)
       (:paths basis)))
 
 (defn- set-gha-output
