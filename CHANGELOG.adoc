@@ -1,6 +1,17 @@
 All notable changes to this project will be documented in this file. This change log follows the conventions of http://keepachangelog.com/[keepachangelog.com].
 
 == Unreleased (dev)
+// {{{
+=== Added
+* Added `skip-compiling-dirs` option for `uberjar` function.
+
+=== Changed
+* Bumped kaocha to 1.69.1069.
+
+=== Fixed
+* https://github.com/liquidz/build.edn/issues/14[#14]: Renamed `source-dir` option to `source-dirs`.
+** The original `source-dir` option was not used.
+// }}}
 
 == 0.5.116 (2022-07-01)
 // {{{

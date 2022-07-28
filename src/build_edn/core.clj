@@ -18,6 +18,7 @@
    :jar-file "target/{{lib}}.jar"
    :uber-file "target/{{lib}}-standalone.jar"
    :deploy-repository {:id "clojars"}
+   :skip-compiling-dirs #{"resources"}
    :github-actions? false})
 
 (defn- validate-config!
@@ -62,7 +63,7 @@
 
 (defn- get-src-dirs
   [config basis]
-  (or (:src-dirs config)
+  (or (:source-dirs config)
       (:paths basis)))
 
 (defn- set-gha-output
@@ -108,19 +109,21 @@
 
 (defn uberjar
   [arg]
-  (let [{:as config :keys [class-dir uber-file main]} (gen-config arg)
+  (let [{:as config :keys [class-dir uber-file main skip-compiling-dirs]} (gen-config arg)
         ?schema (mu/merge be.schema/?build-config be.schema/?uber-build-config)
         _ (validate-config! ?schema config)
         basis (get-basis arg)
         src-dirs (get-src-dirs config basis)
         arg (assoc arg :config config :basis basis)
         uber-file (->> (generate-render-data config)
-                       (pg/render-string uber-file))]
+                       (pg/render-string uber-file))
+        skip-compiling-dir-set (set skip-compiling-dirs)]
+
     (pom arg)
     (b/copy-dir {:src-dirs src-dirs
                  :target-dir class-dir})
     (b/compile-clj {:basis basis
-                    :src-dirs src-dirs
+                    :src-dirs (remove skip-compiling-dir-set src-dirs)
                     :class-dir class-dir})
     (b/uber {:class-dir class-dir
              :uber-file uber-file

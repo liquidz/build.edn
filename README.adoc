@@ -115,8 +115,8 @@ So if you want to tune the build process a bit more, you can use `build-edn.core
 |
 | You can add `description` tag to pom.xml.
 
-| source-dir
-| `string?`
+| source-dirs
+| `sequential?`/`set?` of string
 |
 | Your paths in deps.edn
 |
@@ -144,6 +144,12 @@ So if you want to tune the build process a bit more, you can use `build-edn.core
 |
 |
 | Required only for `uberjar`
+
+| skip-compiling-dirs
+| `sequential?`/`set?` of string
+|
+| `#{"resouces"}`
+| Paths to skip compiling on `uberjar`.
 
 | scm
 | `map?`
