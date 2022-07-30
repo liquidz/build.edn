@@ -7,8 +7,7 @@
    [clojure.string :as str]
    [clojure.test :as t]
    [clojure.tools.build.api :as b]
-   [deps-deploy.deps-deploy :as deploy]
-   [malli.error :as me])
+   [deps-deploy.deps-deploy :as deploy])
   (:import
    clojure.lang.ExceptionInfo))
 
@@ -356,35 +355,34 @@
                                                 :text "baz"}]})))))
 
 (t/deftest lint-test
-  (let [lint' #(str/trim
-                (with-out-str
-                  (with-redefs [me/humanize (constantly "NG")]
-                    (sut/lint (merge {:lib 'foo/bar :version "1"} %)))))]
-    (t/is (= "OK" (lint' {})))
-    (t/is (= "NG" (lint' {:lib "invalid"})))
+  (let [lint' #(with-redefs [sut/print-error (constantly nil)
+                             println (constantly nil)]
+                 (sut/lint (merge {:lib 'foo/bar :version "1"} %)))]
+    (t/is (true? (lint' {})))
+    (t/is (false? (lint' {:lib "invalid"})))
 
     (t/testing "uberjar"
-      (t/is (= "OK" (lint' {:main 'foo})))
-      (t/is (= "OK" (lint' {:main 'foo :skip-compiling-dirs []})))
-      (t/is (= "OK" (lint' {:main 'foo :skip-compiling-dirs #{}})))
-      (t/is (= "NG" (lint' {:main "invalid"})))
-      (t/is (= "NG" (lint' {:main 'foo :skip-compiling-dirs {}}))))
+      (t/is (true? (lint' {:main 'foo})))
+      (t/is (true? (lint' {:main 'foo :skip-compiling-dirs []})))
+      (t/is (true? (lint' {:main 'foo :skip-compiling-dirs #{}})))
+      (t/is (false? (lint' {:main "invalid"})))
+      (t/is (false? (lint' {:main 'foo :skip-compiling-dirs {}}))))
 
     (t/testing "documents"
-      (t/is (= "OK" (lint' {:documents []})))
-      (t/is (= "NG" (lint' {:documents "invalid"}))))
+      (t/is (true? (lint' {:documents []})))
+      (t/is (false? (lint' {:documents "invalid"}))))
 
     (t/testing "deploy-repository"
-      (t/is (= "OK" (lint' {:deploy-repository {:id "foo"}})))
-      (t/is (= "NG" (lint' {:deploy-repository {}})))
-      (t/is (= "NG" (lint' {:deploy-repository {:id 123}}))))
+      (t/is (true? (lint' {:deploy-repository {:id "foo"}})))
+      (t/is (false? (lint' {:deploy-repository {}})))
+      (t/is (false? (lint' {:deploy-repository {:id 123}}))))
 
     (t/testing "pom"
-      (t/is (= "OK" (lint' {:pom {}})))
-      (t/is (= "OK" (lint' {:pom {:no-clojure-itself? true}})))
-      (t/is (= "OK" (lint' {:pom {:scm {:connection "foo"
-                                        :developerConnection "bar"
-                                        :url "baz"}}})))
-      (t/is (= "NG" (lint' {:pom {:no-clojure-itself? "invalid"}})))
-      (t/is (= "NG" (lint' {:pom {:scm "invalid"}})))
-      (t/is (= "NG" (lint' {:pom {:scm {:invalid "foo"}}}))))))
+      (t/is (true? (lint' {:pom {}})))
+      (t/is (true? (lint' {:pom {:no-clojure-itself? true}})))
+      (t/is (true? (lint' {:pom {:scm {:connection "foo"
+                                       :developerConnection "bar"
+                                       :url "baz"}}})))
+      (t/is (false? (lint' {:pom {:no-clojure-itself? "invalid"}})))
+      (t/is (false? (lint' {:pom {:scm "invalid"}})))
+      (t/is (false? (lint' {:pom {:scm {:invalid "foo"}}}))))))
