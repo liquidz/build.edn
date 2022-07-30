@@ -115,7 +115,8 @@
 (defn uberjar
   [arg]
   (let [{:as config :keys [class-dir uber-file main skip-compiling-dirs]} (gen-config arg)
-        ?schema (mu/merge be.schema/?build-config be.schema/?uber-build-config)
+        ?schema (mu/merge be.schema/?build-config
+                          be.schema/?uber-build-config)
         _ (validate-config! ?schema config)
         basis (get-basis arg)
         src-dirs (get-src-dirs config basis)
@@ -152,7 +153,8 @@
 (defn deploy
   [arg]
   (let [{:as config :keys [lib version class-dir deploy-repository]} (gen-config arg)
-        ?schema (mu/merge be.schema/?build-config be.schema/?deploy-repository-build-config)
+        ?schema (mu/merge be.schema/?build-config
+                          be.schema/?deploy-repository-build-config)
         _ (validate-config! ?schema config)
         {:keys [id username password url]} deploy-repository
         arg (assoc arg :config config)
@@ -183,7 +185,8 @@
 (defn update-documents
   [arg]
   (let [{:as config :keys [version documents]} (gen-config arg)
-        ?schema (mu/merge be.schema/?build-config be.schema/?documents-build-config)
+        ?schema (mu/merge be.schema/?build-config
+                          be.schema/?documents-build-config)
         _ (validate-config! ?schema config)
         render-data (generate-render-data config)]
     (doseq [{:keys [file match action text]} documents
