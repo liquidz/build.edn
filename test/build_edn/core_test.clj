@@ -7,7 +7,8 @@
    [clojure.string :as str]
    [clojure.test :as t]
    [clojure.tools.build.api :as b]
-   [deps-deploy.deps-deploy :as deploy])
+   [deps-deploy.deps-deploy :as deploy]
+   [malli.error :as me])
   (:import
    clojure.lang.ExceptionInfo))
 
@@ -353,3 +354,37 @@
                                                 :match "bar"
                                                 :action ::invalid
                                                 :text "baz"}]})))))
+
+(t/deftest lint-test
+  (let [lint' #(str/trim
+                (with-out-str
+                  (with-redefs [me/humanize (constantly "NG")]
+                    (sut/lint (merge {:lib 'foo/bar :version "1"} %)))))]
+    (t/is (= "OK" (lint' {})))
+    (t/is (= "NG" (lint' {:lib "invalid"})))
+
+    (t/testing "uberjar"
+      (t/is (= "OK" (lint' {:main 'foo})))
+      (t/is (= "OK" (lint' {:main 'foo :skip-compiling-dirs []})))
+      (t/is (= "OK" (lint' {:main 'foo :skip-compiling-dirs #{}})))
+      (t/is (= "NG" (lint' {:main "invalid"})))
+      (t/is (= "NG" (lint' {:main 'foo :skip-compiling-dirs {}}))))
+
+    (t/testing "documents"
+      (t/is (= "OK" (lint' {:documents []})))
+      (t/is (= "NG" (lint' {:documents "invalid"}))))
+
+    (t/testing "deploy-repository"
+      (t/is (= "OK" (lint' {:deploy-repository {:id "foo"}})))
+      (t/is (= "NG" (lint' {:deploy-repository {}})))
+      (t/is (= "NG" (lint' {:deploy-repository {:id 123}}))))
+
+    (t/testing "pom"
+      (t/is (= "OK" (lint' {:pom {}})))
+      (t/is (= "OK" (lint' {:pom {:no-clojure-itself? true}})))
+      (t/is (= "OK" (lint' {:pom {:scm {:connection "foo"
+                                        :developerConnection "bar"
+                                        :url "baz"}}})))
+      (t/is (= "NG" (lint' {:pom {:no-clojure-itself? "invalid"}})))
+      (t/is (= "NG" (lint' {:pom {:scm "invalid"}})))
+      (t/is (= "NG" (lint' {:pom {:scm {:invalid "foo"}}}))))))

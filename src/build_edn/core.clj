@@ -213,7 +213,16 @@
   (let [config (gen-config arg)
         ?schema (cond-> be.schema/?build-config
                   (contains? config :documents)
-                  (mu/merge be.schema/?documents-build-config))]
+                  (mu/merge be.schema/?documents-build-config)
+
+                  (contains? config :main)
+                  (mu/merge be.schema/?uber-build-config)
+
+                  (contains? config :deploy-repository)
+                  (mu/merge be.schema/?deploy-repository-build-config)
+
+                  (contains? config :pom)
+                  (mu/merge be.schema/?pom-build-config))]
     (if-let [e (m/explain ?schema config)]
       (do (println (me/humanize e))
           false)
