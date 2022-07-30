@@ -33,6 +33,7 @@
                     :url "https://github.com/liquidz/build.edn"
                     :tag "1.2.3"}
               :skip-compiling-dirs #{"resources"}
+              :pom {:no-clojure-itself? false}
               :github-actions? false}
              (#'sut/gen-config {:lib 'foo/bar
                                 :version "1.2.{{git/commit-count}}"})))
@@ -68,7 +69,10 @@
                       :developerConnection "scm:git:ssh://git@github.com/liquidz/build.edn.git"
                       :url "https://github.com/liquidz/build.edn"
                       :tag "1.2.3"}}
-               (dissoc @write-pom-arg :basis)))))
+               (dissoc @write-pom-arg :basis)))
+
+      (t/is (contains? (get-in @write-pom-arg [:basis :libs])
+                       'org.clojure/clojure))))
 
   (t/testing "source-dirs"
     (let [write-pom-arg (atom nil)]
@@ -78,6 +82,15 @@
                                :source-dirs ["foo" "bar"]}))))
       (t/is (= ["foo" "bar"]
                (:src-dirs @write-pom-arg)))))
+
+  (t/testing "no-clojure-itself?"
+    (let [write-pom-arg (atom nil)]
+      (with-redefs [b/write-pom (fn [m] (reset! write-pom-arg m))]
+        (t/is (some? (sut/pom {:lib 'foo/bar
+                               :version "1.2.3"
+                               :pom {:no-clojure-itself? true}}))))
+      (t/is (not (contains? (get-in @write-pom-arg [:basis :libs])
+                            'org.clojure/clojure)))))
 
   (t/testing "github-actions?"
     (with-redefs [b/write-pom (constantly nil)]

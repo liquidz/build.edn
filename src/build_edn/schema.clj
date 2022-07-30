@@ -63,3 +63,11 @@
 (def ?deploy-repository-build-config
   (l/schema
    {:deploy-repository ?deploy-repository}))
+
+(def ?pom
+  (l/schema
+   {:no-clojure-itself? (l/optional boolean?)}))
+
+(def ?pom-build-config
+  (l/schema
+   {:pom ?pom}))

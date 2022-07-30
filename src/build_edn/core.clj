@@ -18,6 +18,7 @@
    :jar-file "target/{{lib}}.jar"
    :uber-file "target/{{lib}}-standalone.jar"
    :deploy-repository {:id "clojars"}
+   :pom {:no-clojure-itself? false}
    :skip-compiling-dirs #{"resources"}
    :github-actions? false})
 
@@ -73,9 +74,13 @@
 
 (defn pom
   [arg]
-  (let [{:as config :keys [description]} (gen-config arg)
-        _ (validate-config! config)
-        basis (get-basis arg)
+  (let [{:as config :keys [description pom]} (gen-config arg)
+        ?schema (mu/merge be.schema/?build-config
+                          be.schema/?pom-build-config)
+        _ (validate-config! ?schema config)
+        basis (cond-> (get-basis arg)
+                (or (:no-clojure-itself? pom) false)
+                (update :libs dissoc 'org.clojure/clojure))
         pom-path (b/pom-path config)]
     (-> config
         (select-keys [:lib :version :class-dir :scm])
