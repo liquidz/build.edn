@@ -1,4 +1,26 @@
-= scm
+= pom
+
+
+[cols="2,1,1,1,5a"]
+|===
+| name | type | required? | default value | description
+
+| scm
+| `map?`
+|
+| Collected from `.git/config` automatically
+| See the following section for more details.
+
+| no-clojure-itself?
+| `boolean?`
+|
+| `false`
+| Do not contain clojure itself as a dependency.
+
+|===
+
+
+== scm
 
 `scm` section is used to detect where source codes are managed in remote Maven repositories such as https://clojars.org[clojars.org].
 

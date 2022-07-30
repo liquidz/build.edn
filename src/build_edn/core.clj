@@ -18,6 +18,7 @@
    :jar-file "target/{{lib}}.jar"
    :uber-file "target/{{lib}}-standalone.jar"
    :deploy-repository {:id "clojars"}
+   :pom {:no-clojure-itself? false}
    :skip-compiling-dirs #{"resources"}
    :github-actions? false})
 
@@ -46,8 +47,9 @@
                      (and (:version arg)
                           (str/includes? (:version arg) "{{"))
                      (update :version #(pg/render-string % render-data)))
-            config (if-let [scm (and (not (contains? config :scm))
-                                     (be.pom/generate-scm-from-git-dir))]
+            scm (or (get-in config [:pom :scm])
+                    (be.pom/generate-scm-from-git-dir))
+            config (if (and scm (map? scm))
                      (assoc config :scm scm)
                      config)
             config (cond-> config
@@ -73,9 +75,13 @@
 
 (defn pom
   [arg]
-  (let [{:as config :keys [description]} (gen-config arg)
-        _ (validate-config! config)
-        basis (get-basis arg)
+  (let [{:as config :keys [description pom]} (gen-config arg)
+        ?schema (mu/merge be.schema/?build-config
+                          be.schema/?pom-build-config)
+        _ (validate-config! ?schema config)
+        basis (cond-> (get-basis arg)
+                (or (:no-clojure-itself? pom) false)
+                (update :libs dissoc 'org.clojure/clojure))
         pom-path (b/pom-path config)]
     (-> config
         (select-keys [:lib :version :class-dir :scm])
@@ -110,7 +116,8 @@
 (defn uberjar
   [arg]
   (let [{:as config :keys [class-dir uber-file main skip-compiling-dirs]} (gen-config arg)
-        ?schema (mu/merge be.schema/?build-config be.schema/?uber-build-config)
+        ?schema (mu/merge be.schema/?build-config
+                          be.schema/?uber-build-config)
         _ (validate-config! ?schema config)
         basis (get-basis arg)
         src-dirs (get-src-dirs config basis)
@@ -147,7 +154,8 @@
 (defn deploy
   [arg]
   (let [{:as config :keys [lib version class-dir deploy-repository]} (gen-config arg)
-        ?schema (mu/merge be.schema/?build-config be.schema/?deploy-repository-build-config)
+        ?schema (mu/merge be.schema/?build-config
+                          be.schema/?deploy-repository-build-config)
         _ (validate-config! ?schema config)
         {:keys [id username password url]} deploy-repository
         arg (assoc arg :config config)
@@ -178,7 +186,8 @@
 (defn update-documents
   [arg]
   (let [{:as config :keys [version documents]} (gen-config arg)
-        ?schema (mu/merge be.schema/?build-config be.schema/?documents-build-config)
+        ?schema (mu/merge be.schema/?build-config
+                          be.schema/?documents-build-config)
         _ (validate-config! ?schema config)
         render-data (generate-render-data config)]
     (doseq [{:keys [file match action text]} documents
@@ -204,7 +213,16 @@
   (let [config (gen-config arg)
         ?schema (cond-> be.schema/?build-config
                   (contains? config :documents)
-                  (mu/merge be.schema/?documents-build-config))]
+                  (mu/merge be.schema/?documents-build-config)
+
+                  (contains? config :main)
+                  (mu/merge be.schema/?uber-build-config)
+
+                  (contains? config :deploy-repository)
+                  (mu/merge be.schema/?deploy-repository-build-config)
+
+                  (contains? config :pom)
+                  (mu/merge be.schema/?pom-build-config))]
     (if-let [e (m/explain ?schema config)]
       (do (println (me/humanize e))
           false)

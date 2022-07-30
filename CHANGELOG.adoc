@@ -1,6 +1,17 @@
 All notable changes to this project will be documented in this file. This change log follows the conventions of http://keepachangelog.com/[keepachangelog.com].
 
 == Unreleased (dev)
+// {{{
+=== Added
+* Added `pom` option for `pom` function.
+** Added `no-clojure-itself?` option in `pom`.
+
+=== Changed
+* (BREAKING) Moved `scm` option to under `pom` option.
+
+=== Fixed
+* Fixed `lint` function to work correctly.
+// }}}
 
 == 0.6.131 (2022-07-28)
 // {{{

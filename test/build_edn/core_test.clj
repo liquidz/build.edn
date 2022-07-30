@@ -7,7 +7,8 @@
    [clojure.string :as str]
    [clojure.test :as t]
    [clojure.tools.build.api :as b]
-   [deps-deploy.deps-deploy :as deploy])
+   [deps-deploy.deps-deploy :as deploy]
+   [malli.error :as me])
   (:import
    clojure.lang.ExceptionInfo))
 
@@ -33,6 +34,7 @@
                     :url "https://github.com/liquidz/build.edn"
                     :tag "1.2.3"}
               :skip-compiling-dirs #{"resources"}
+              :pom {:no-clojure-itself? false}
               :github-actions? false}
              (#'sut/gen-config {:lib 'foo/bar
                                 :version "1.2.{{git/commit-count}}"})))
@@ -44,9 +46,9 @@
                 :tag "1.2.3"}
                (:scm (#'sut/gen-config {:lib 'foo/bar
                                         :version "1.2.{{git/commit-count}}"
-                                        :scm {:connection "a"
-                                              :developerConnection "b"
-                                              :url "c"}})))))
+                                        :pom {:scm {:connection "a"
+                                                    :developerConnection "b"
+                                                    :url "c"}}})))))
 
     (t/testing "failed to generate scm"
       (with-redefs [be.pom/generate-scm-from-git-dir (constantly nil)]
@@ -68,7 +70,10 @@
                       :developerConnection "scm:git:ssh://git@github.com/liquidz/build.edn.git"
                       :url "https://github.com/liquidz/build.edn"
                       :tag "1.2.3"}}
-               (dissoc @write-pom-arg :basis)))))
+               (dissoc @write-pom-arg :basis)))
+
+      (t/is (contains? (get-in @write-pom-arg [:basis :libs])
+                       'org.clojure/clojure))))
 
   (t/testing "source-dirs"
     (let [write-pom-arg (atom nil)]
@@ -78,6 +83,15 @@
                                :source-dirs ["foo" "bar"]}))))
       (t/is (= ["foo" "bar"]
                (:src-dirs @write-pom-arg)))))
+
+  (t/testing "no-clojure-itself?"
+    (let [write-pom-arg (atom nil)]
+      (with-redefs [b/write-pom (fn [m] (reset! write-pom-arg m))]
+        (t/is (some? (sut/pom {:lib 'foo/bar
+                               :version "1.2.3"
+                               :pom {:no-clojure-itself? true}}))))
+      (t/is (not (contains? (get-in @write-pom-arg [:basis :libs])
+                            'org.clojure/clojure)))))
 
   (t/testing "github-actions?"
     (with-redefs [b/write-pom (constantly nil)]
@@ -340,3 +354,37 @@
                                                 :match "bar"
                                                 :action ::invalid
                                                 :text "baz"}]})))))
+
+(t/deftest lint-test
+  (let [lint' #(str/trim
+                (with-out-str
+                  (with-redefs [me/humanize (constantly "NG")]
+                    (sut/lint (merge {:lib 'foo/bar :version "1"} %)))))]
+    (t/is (= "OK" (lint' {})))
+    (t/is (= "NG" (lint' {:lib "invalid"})))
+
+    (t/testing "uberjar"
+      (t/is (= "OK" (lint' {:main 'foo})))
+      (t/is (= "OK" (lint' {:main 'foo :skip-compiling-dirs []})))
+      (t/is (= "OK" (lint' {:main 'foo :skip-compiling-dirs #{}})))
+      (t/is (= "NG" (lint' {:main "invalid"})))
+      (t/is (= "NG" (lint' {:main 'foo :skip-compiling-dirs {}}))))
+
+    (t/testing "documents"
+      (t/is (= "OK" (lint' {:documents []})))
+      (t/is (= "NG" (lint' {:documents "invalid"}))))
+
+    (t/testing "deploy-repository"
+      (t/is (= "OK" (lint' {:deploy-repository {:id "foo"}})))
+      (t/is (= "NG" (lint' {:deploy-repository {}})))
+      (t/is (= "NG" (lint' {:deploy-repository {:id 123}}))))
+
+    (t/testing "pom"
+      (t/is (= "OK" (lint' {:pom {}})))
+      (t/is (= "OK" (lint' {:pom {:no-clojure-itself? true}})))
+      (t/is (= "OK" (lint' {:pom {:scm {:connection "foo"
+                                        :developerConnection "bar"
+                                        :url "baz"}}})))
+      (t/is (= "NG" (lint' {:pom {:no-clojure-itself? "invalid"}})))
+      (t/is (= "NG" (lint' {:pom {:scm "invalid"}})))
+      (t/is (= "NG" (lint' {:pom {:scm {:invalid "foo"}}}))))))
