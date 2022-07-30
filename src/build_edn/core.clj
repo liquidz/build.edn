@@ -208,6 +208,25 @@
     (set-gha-output config "version" version)
     version))
 
+(defn- print-error
+  ([err]
+   (print-error 0 err))
+  ([indent-level err]
+   (cond
+     (map? err)
+     (doseq [[k v] err]
+       (print-error indent-level k)
+       (print-error (inc indent-level) v))
+
+     (sequential? err)
+     (doseq [v err]
+       (print-error indent-level v))
+
+     :else
+     (println (format "%s* %s"
+                      (str (apply str (repeat (* 2 indent-level) " ")))
+                      err)))))
+
 (defn lint
   [arg]
   (let [config (gen-config arg)
@@ -224,7 +243,7 @@
                   (contains? config :pom)
                   (mu/merge be.schema/?pom-build-config))]
     (if-let [e (m/explain ?schema config)]
-      (do (println (me/humanize e))
+      (do (print-error (me/humanize e))
           false)
       (do (println "OK")
           true))))
