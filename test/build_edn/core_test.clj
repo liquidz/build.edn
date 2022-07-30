@@ -45,9 +45,9 @@
                 :tag "1.2.3"}
                (:scm (#'sut/gen-config {:lib 'foo/bar
                                         :version "1.2.{{git/commit-count}}"
-                                        :scm {:connection "a"
-                                              :developerConnection "b"
-                                              :url "c"}})))))
+                                        :pom {:scm {:connection "a"
+                                                    :developerConnection "b"
+                                                    :url "c"}}})))))
 
     (t/testing "failed to generate scm"
       (with-redefs [be.pom/generate-scm-from-git-dir (constantly nil)]

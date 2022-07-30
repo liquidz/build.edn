@@ -12,12 +12,6 @@
   [x]
   (l/schema [:sequential (l/schema x)]))
 
-(def ?scm
-  (l/schema
-   {:connection string?
-    :developerConnection string?
-    :url string?}))
-
 (def ?build-config
   (l/schema
    {:lib qualified-symbol?
@@ -27,7 +21,6 @@
                                    (l/set string?)))
     :class-dir (l/optional string?)
     :jar-file (l/optional string?)
-    :scm (l/optional ?scm)
     :github-actions? (l/optional boolean?)}))
 
 (def ?uber-build-config
@@ -64,9 +57,16 @@
   (l/schema
    {:deploy-repository ?deploy-repository}))
 
+(def ?scm
+  (l/schema
+   {:connection string?
+    :developerConnection string?
+    :url string?}))
+
 (def ?pom
   (l/schema
-   {:no-clojure-itself? (l/optional boolean?)}))
+   {:scm (l/optional ?scm)
+    :no-clojure-itself? (l/optional boolean?)}))
 
 (def ?pom-build-config
   (l/schema

@@ -47,8 +47,9 @@
                      (and (:version arg)
                           (str/includes? (:version arg) "{{"))
                      (update :version #(pg/render-string % render-data)))
-            config (if-let [scm (and (not (contains? config :scm))
-                                     (be.pom/generate-scm-from-git-dir))]
+            scm (or (get-in config [:pom :scm])
+                    (be.pom/generate-scm-from-git-dir))
+            config (if (and scm (map? scm))
                      (assoc config :scm scm)
                      config)
             config (cond-> config
