@@ -333,6 +333,33 @@
         (t/is (= {"foo.txt" "foo\nbar\nbaz\n"}
                  @updated)))))
 
+  (t/testing "keep-indent?"
+    (let [updated (atom {})]
+      (with-redefs [slurp (constantly "foo\n  bar")
+                    spit (fn [f content]
+                           (swap! updated assoc f content))]
+        (sut/update-documents {:lib 'foo/bar
+                               :version "1.2.{{commit-count}}"
+                               :documents [{:file "append_before.txt"
+                                            :match "bar"
+                                            :action :append-before
+                                            :keep-indent? true
+                                            :text "baz"}
+                                           {:file "replace.txt"
+                                            :match "bar"
+                                            :action :replace
+                                            :keep-indent? true
+                                            :text "baz"}
+                                           {:file "append_after.txt"
+                                            :match "bar"
+                                            :action :append-after
+                                            :keep-indent? true
+                                            :text "baz"}]})
+        (t/is (= {"append_before.txt" "foo\n  baz\n  bar"
+                  "replace.txt" "foo\n  baz"
+                  "append_after.txt" "foo\n  bar\n  baz"}
+                 @updated)))))
+
   (t/testing "validation error"
     (t/is (thrown-with-msg? ExceptionInfo #"Invalid config"
             (sut/update-documents {})))

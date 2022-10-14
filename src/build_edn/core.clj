@@ -3,6 +3,7 @@
    [build-edn.pom :as be.pom]
    [build-edn.repository :as be.repo]
    [build-edn.schema :as be.schema]
+   [build-edn.util.string :as be.u.str]
    [build-edn.variable :as be.var]
    [build-edn.version :as be.ver]
    [clojure.string :as str]
@@ -191,7 +192,7 @@
                           be.schema/?documents-build-config)
         _ (validate-config! ?schema config)
         render-data (generate-render-data config)]
-    (doseq [{:keys [file match action text]} documents
+    (doseq [{:keys [file match action text keep-indent?]} documents
             :let [regexp (when (string? match)
                            (re-pattern match))
                   text (pg/render-string text render-data)]]
@@ -200,10 +201,13 @@
         (->> (slurp file)
              (update-line (fn [[line]]
                             (if (re-find regexp line)
-                              (case action
-                                :append-before [text line]
-                                :append-after [line text]
-                                [text])
+                              (let [text (if keep-indent?
+                                           (be.u.str/add-indent line text)
+                                           text)]
+                                (case action
+                                  :append-before [text line]
+                                  :append-after [line text]
+                                  [text]))
                               [line])))
              (spit file))))
     (set-gha-output config "version" version)
