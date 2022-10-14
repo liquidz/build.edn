@@ -23,6 +23,9 @@
    :skip-compiling-dirs #{"resources"}
    :github-actions? false})
 
+(defn- getenv [k]
+  (System/getenv k))
+
 (defn- validate-config!
   ([config]
    (validate-config! be.schema/?build-config config))
@@ -72,7 +75,7 @@
 (defn- set-gha-output
   [config k v]
   (when (:github-actions? config)
-    (when-let [github-output (System/getenv "GITHUB_OUTPUT")]
+    (when-let [github-output (getenv "GITHUB_OUTPUT")]
       (spit github-output (str k "=" v "\n") :append true))))
 
 (defn pom

@@ -4,21 +4,20 @@
    [build-edn.pom :as be.pom]
    [build-edn.repository :as be.repo]
    [build-edn.variable :as be.var]
-   [clojure.string :as str]
    [clojure.test :as t]
    [clojure.tools.build.api :as b]
    [deps-deploy.deps-deploy :as deploy])
   (:import
    clojure.lang.ExceptionInfo))
 
-(defmacro with-out-str-and-ret
-  [& body]
-  `(let [s# (new java.io.StringWriter)]
-     (binding [*out* s#]
-       (let [ret# (do ~@body)
-             out# (str s#)]
-         {:ret ret#
-          :out (when (seq out#) out#)}))))
+(def ^:private dummy-githut-output
+  "__dummy-github-output__")
+
+(defn- dummy-getenv
+  [k]
+  (case k
+    "GITHUB_OUTPUT" dummy-githut-output
+    nil))
 
 (t/deftest config-test
   (with-redefs [b/git-count-revs (constantly "3")]
@@ -93,11 +92,15 @@
                             'org.clojure/clojure)))))
 
   (t/testing "github-actions?"
-    (with-redefs [b/write-pom (constantly nil)]
-      (let [{:keys [ret out]} (with-out-str-and-ret
-                                (sut/pom {:lib 'foo/bar :version "1" :github-actions? true}))]
-        (t/is (str/starts-with? out "::set-output name=pom::"))
-        (t/is (str/includes? out ret)))))
+    (let [output (atom {})]
+      (with-redefs [b/write-pom (constantly nil)
+                    sut/getenv dummy-getenv
+                    spit (fn [f content & _options]
+                           (swap! output assoc f content))]
+        (let [ret (sut/pom {:lib 'foo/bar :version "1" :github-actions? true})]
+          (t/is (seq ret))
+          (t/is (= {dummy-githut-output (format "pom=%s\n" ret)}
+                   @output))))))
 
   (t/testing "validation error"
     (t/is (thrown-with-msg? ExceptionInfo #"Invalid config"
@@ -132,13 +135,17 @@
                @copy-dir-arg))))
 
   (t/testing "github-actions?"
-    (with-redefs [sut/pom (constantly nil)
-                  b/copy-dir (constantly nil)
-                  b/jar (constantly nil)]
-      (let [{:keys [ret out]} (with-out-str-and-ret
-                                (sut/jar {:lib 'foo/bar :version "1" :github-actions? true}))]
-        (t/is (str/starts-with? out "::set-output name=jar::"))
-        (t/is (str/includes? out ret)))))
+    (let [output (atom {})]
+      (with-redefs [sut/pom (constantly nil)
+                    b/copy-dir (constantly nil)
+                    b/jar (constantly nil)
+                    sut/getenv dummy-getenv
+                    spit (fn [f contents & _]
+                           (swap! output assoc f contents))]
+        (let [ret (sut/jar {:lib 'foo/bar :version "1" :github-actions? true})]
+          (t/is (seq ret))
+          (t/is (= {dummy-githut-output (format "jar=%s\n" ret)}
+                   @output))))))
 
   (t/testing "validation error"
     (t/is (thrown-with-msg? ExceptionInfo #"Invalid config"
@@ -187,14 +194,18 @@
                (dissoc @compile-clj-arg :basis)))))
 
   (t/testing "github-actions?"
-    (with-redefs [sut/pom (constantly nil)
-                  b/copy-dir (constantly nil)
-                  b/compile-clj (constantly nil)
-                  b/uber (constantly nil)]
-      (let [{:keys [ret out]} (with-out-str-and-ret
-                                (sut/uberjar {:lib 'foo/bar :version "1" :main 'bar.core :github-actions? true}))]
-        (t/is (str/starts-with? out "::set-output name=uberjar::"))
-        (t/is (str/includes? out ret)))))
+    (let [output (atom {})]
+      (with-redefs [sut/pom (constantly nil)
+                    b/copy-dir (constantly nil)
+                    b/compile-clj (constantly nil)
+                    b/uber (constantly nil)
+                    sut/getenv dummy-getenv
+                    spit (fn [f contents & _]
+                           (swap! output assoc f contents))]
+        (let [ret (sut/uberjar {:lib 'foo/bar :version "1" :main 'bar.core :github-actions? true})]
+          (t/is (seq ret))
+          (t/is (= {dummy-githut-output (format "uberjar=%s\n" ret)}
+                   @output))))))
 
   (t/testing "skip-compiling-dirs"
     (let [compile-clj-arg (atom nil)]
@@ -227,13 +238,17 @@
                @deploy-arg))))
 
   (t/testing "github-actions?"
-    (with-redefs [b/git-count-revs (constantly "3")
-                  sut/jar (constantly "./target/dummy.jar")
-                  deploy/deploy (constantly nil)]
-      (let [{:keys [ret out]} (with-out-str-and-ret
-                                (sut/install {:lib 'foo/bar :version "1.2.{{git/commit-count}}" :github-actions? true}))]
-        (t/is (= out "::set-output name=version::1.2.3\n"))
-        (t/is (= ret "1.2.3")))))
+    (let [output (atom {})]
+      (with-redefs [b/git-count-revs (constantly "3")
+                    sut/jar (constantly "./target/dummy.jar")
+                    deploy/deploy (constantly nil)
+                    sut/getenv dummy-getenv
+                    spit (fn [f contents & _]
+                           (swap! output assoc f contents))]
+        (t/is (= "1.2.3"
+                 (sut/install {:lib 'foo/bar :version "1.2.{{git/commit-count}}" :github-actions? true})))
+        (t/is (= {dummy-githut-output "version=1.2.3\n"}
+                 @output)))))
 
   (t/testing "validation error"
     (t/is (thrown-with-msg? ExceptionInfo #"Invalid config"
@@ -266,14 +281,18 @@
                @deploy-arg))))
 
   (t/testing "github-actions?"
-    (with-redefs [be.repo/repository-by-id dummy-repository-by-id
-                  b/git-count-revs (constantly "3")
-                  sut/jar (constantly "./target/dummy.jar")
-                  deploy/deploy (constantly nil)]
-      (let [{:keys [ret out]} (with-out-str-and-ret
-                                (sut/deploy {:lib 'foo/bar :version "1.2.{{git/commit-count}}" :github-actions? true}))]
-        (t/is (= out "::set-output name=version::1.2.3\n"))
-        (t/is (= ret "1.2.3")))))
+    (let [output (atom {})]
+      (with-redefs [be.repo/repository-by-id dummy-repository-by-id
+                    b/git-count-revs (constantly "3")
+                    sut/jar (constantly "./target/dummy.jar")
+                    deploy/deploy (constantly nil)
+                    sut/getenv dummy-getenv
+                    spit (fn [f contents & _]
+                           (swap! output assoc f contents))]
+        (t/is (= "1.2.3"
+                 (sut/deploy {:lib 'foo/bar :version "1.2.{{git/commit-count}}" :github-actions? true})))
+        (t/is (= {dummy-githut-output "version=1.2.3\n"}
+                 @output)))))
 
   (t/testing "validation error"
     (with-redefs [be.repo/repository-by-id dummy-repository-by-id]
