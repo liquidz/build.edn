@@ -1,73 +1,62 @@
-(ns build-edn.schema
-  (:require
-   [malli.experimental.lite :as l]))
-
-(defn- enum
-  [& xs]
-  (-> (cons :enum xs)
-      (vec)
-      (l/schema)))
-
-(defn- sequential
-  [x]
-  (l/schema [:sequential (l/schema x)]))
+(ns build-edn.schema)
 
 (def ?build-config
-  (l/schema
-   {:lib qualified-symbol?
-    :version string?
-    :description (l/optional string?)
-    :source-dirs (l/optional (l/or (sequential string?)
-                                   (l/set string?)))
-    :class-dir (l/optional string?)
-    :jar-file (l/optional string?)
-    :github-actions? (l/optional boolean?)}))
+  [:map
+   [:lib qualified-symbol?]
+   [:version string?]
+   [:description {:optional true} string?]
+   [:source-dirs {:optional true} [:or
+                                   [:sequential string?]
+                                   [:set string?]]]
+   [:class-dir {:optional true} string?]
+   [:jar-file {:optional true} string?]
+   [:github-actions? {:optional true} boolean?]])
 
 (def ?uber-build-config
-  (l/schema
-   {:uber-file string?
-    :main symbol?
-    :skip-compiling-dirs (l/optional (l/or (sequential string?)
-                                           (l/set string?)))}))
+  [:map
+   [:uber-file string?]
+   [:main symbol?]
+   [:skip-compiling-dirs {:optional true} [:or
+                                           [:sequential string?]
+                                           [:set string?]]]])
 
 (def ?document
-  (l/or
-   (l/schema
-    {:file string?
-     :match string?
-     :action (enum :append-before :replace :append-after)
-     :text string?})
-   (l/schema
-    {:file string?
-     :action (enum :create)
-     :text string?})))
+  [:or
+   [:map {:closed true}
+    [:file string?]
+    [:match string?]
+    [:action [:enum :append-before :replace :append-after]]
+    [:text string?]]
+   [:map {:closed true}
+    [:file string?]
+    [:action [:enum :create]]
+    [:text string?]]])
 
 (def ?documents-build-config
-  (l/schema
-   {:documents (sequential ?document)}))
+  [:map [:documents [:sequential ?document]]])
 
 (def ?deploy-repository
-  (l/schema
-   {:id string?
-    :username (l/optional string?)
-    :password (l/optional string?)
-    :url (l/optional string?)}))
+  [:map
+   [:id string?]
+   [:username {:optional true} string?]
+   [:password {:optional true} string?]
+   [:url {:optional true} string?]])
 
 (def ?deploy-repository-build-config
-  (l/schema
-   {:deploy-repository ?deploy-repository}))
+  [:map
+   [:deploy-repository ?deploy-repository]])
 
 (def ?scm
-  (l/schema
-   {:connection string?
-    :developerConnection string?
-    :url string?}))
+  [:map
+   [:connection string?]
+   [:developerConnection string?]
+   [:url string?]])
 
 (def ?pom
-  (l/schema
-   {:scm (l/optional ?scm)
-    :no-clojure-itself? (l/optional boolean?)}))
+  [:map
+   [:scm {:optional true} ?scm]
+   [:no-clojure-itself? {:optional true} boolean?]])
 
 (def ?pom-build-config
-  (l/schema
-   {:pom ?pom}))
+  [:map
+   [:pom ?pom]])
