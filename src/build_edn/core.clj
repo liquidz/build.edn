@@ -71,7 +71,8 @@
 (defn- set-gha-output
   [config k v]
   (when (:github-actions? config)
-    (println (str "::set-output name=" k "::" v))))
+    (when-let [github-output (System/getenv "GITHUB_OUTPUT")]
+      (spit github-output (str k "=" v "\n") :append true))))
 
 (defn pom
   [arg]
