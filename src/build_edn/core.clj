@@ -23,7 +23,8 @@
    :skip-compiling-dirs #{"resources"}
    :github-actions? false})
 
-(defn- getenv [k]
+(defn- getenv
+  [k]
   (System/getenv k))
 
 (defn- validate-config!
