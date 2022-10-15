@@ -57,6 +57,11 @@
                                             :text ""})))
     (t/is (true? (m/validate sut/?document {:file ""
                                             :action :create
+                                            :text ""})))
+    (t/is (true? (m/validate sut/?document {:file ""
+                                            :match ""
+                                            :action :append-after
+                                            :keep-indent? true
                                             :text ""}))))
 
   (t/testing "falsy"
@@ -67,6 +72,10 @@
     (t/is (false? (m/validate sut/?document {:file 123
                                              :match ""
                                              :action :replace
+                                             :text ""})))
+    (t/is (false? (m/validate sut/?document {:file ""
+                                             :action :create
+                                             :keep-indent? true
                                              :text ""})))))
 
 (t/deftest documents-build-config-test

@@ -26,6 +26,11 @@
 - `append-after` -- Append `:text` after the base line
 - `create` -- Create a new file which has `:text` as contents
 
+| keep-indent?
+| `boolean?`
+| No, but only available for actions excepting `create`
+| If `true`, the text to be updated will keep the indentation of the text matched to `match`
+
 | text
 | `string?`
 | Yes

@@ -2,9 +2,15 @@ All notable changes to this project will be documented in this file. This change
 
 == Unreleased (dev)
 // {{{
+=== Added
+* Added `keep-indent?` option for `documents` setting.
+** See link:./doc/format/documents.adoc[doc/format/documents.adoc] for more details.
+
 === Changed
 * Bumped data.xml to 0.2.0-alpha8.
 * Bumped kaocha to 1.70.1086.
+* https://github.com/liquidz/build.edn/issues/19[#19]: Updated not to use `::set-output` which is deprecated.
+** https://github.blog/changelog/2022-10-11-github-actions-deprecating-save-state-and-set-output-commands/
 // }}}
 
 == 0.7.145 (2022-07-30)
