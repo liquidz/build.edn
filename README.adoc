@@ -26,6 +26,7 @@ build.edn make you buildable your libraries only preparing `build.edn` file for 
 [source,clojure]
 ----
 {:lib com.github.YOUR-ACCOUNT/AWESOME-LIB
+ ;; You could also specify a fixed version like "0.1.2" if you want.
  :version "0.1.{{git/commit-count}}"}
 ----
 
@@ -90,6 +91,29 @@ So if you want to tune the build process a bit more, you can use `build-edn.core
   (build-edn/deploy config))
 ----
 
+=== Version operation
+
+The following operations will update your `build.edn` file.
+
+[source,bash]
+----
+# Bump major version and update configuration file
+$ clojure -T:build bump-major-version
+
+# Bump minor version and update configuration file
+$ clojure -T:build bump-minor-version
+
+# Bump patch version and update configuration file
+# But when the patch version is a variable like '{{git/commit-count}}',
+# this operation will be failed.
+$ clojure -T:build bump-patch-version
+
+# Add '-SNAPSHOT' to version number and update configuration file
+$ clojure -T:build add-snapshot
+
+# Remove '-SNAPSHOT' from version number and update configuration file
+$ clojure -T:build remove-snapshot
+----
 
 == build.edn file format
 

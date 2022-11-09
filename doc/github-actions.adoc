@@ -30,6 +30,26 @@ When you set `true` to `:github-actions?` in `build.edn` file, build.edn will se
 | `${{ steps.ID.outputs.version }}`
 | Tagged version string
 
+| bump-major-version
+| `${{ steps.ID.outputs.version }}`
+| Bumped new version string
+
+| bump-minor-version
+| `${{ steps.ID.outputs.version }}`
+| Bumped new version string
+
+| bump-patch-version
+| `${{ steps.ID.outputs.version }}`
+| Bumped new version string
+
+| add-snapshot
+| `${{ steps.ID.outputs.version }}`
+| Updated new version string
+
+| remove-snapshot
+| `${{ steps.ID.outputs.version }}`
+| Updated new version string
+
 |===
 
 
