@@ -3,7 +3,7 @@
         org.clojure/data.xml {:mvn/version "0.2.0-alpha8"}
         io.github.clojure/tools.build {:git/tag "v0.8.4" :git/sha "8c3cd69"}
         rewrite-clj/rewrite-clj {:mvn/version "1.1.45"}
-        metosin/malli {:mvn/version "0.8.9"}
+        metosin/malli {:mvn/version "0.9.2"}
         slipset/deps-deploy {:mvn/version "0.2.0"}
         pogonos/pogonos {:mvn/version "0.2.0"}
         aero/aero {:mvn/version "1.1.6"}}
