@@ -2,6 +2,7 @@
 
 (def ?build-config
   [:map
+   [:config-file {:optional true} string?] ; The file path containing build configuration
    [:lib qualified-symbol?]
    [:version string?]
    [:description {:optional true} string?]

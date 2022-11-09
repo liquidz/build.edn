@@ -4,8 +4,12 @@
    [build-edn.core :as core]))
 
 (defn- load-config
-  []
-  (aero/read-config "build.edn"))
+  ([]
+   (load-config "build.edn"))
+  ([path]
+   (-> path
+       (aero/read-config)
+       (assoc :config-file path))))
 
 (defn pom
   "Generate pom.xml"
@@ -55,6 +59,41 @@
   (-> (load-config)
       (merge m)
       (core/lint)))
+
+(defn bump-patch-version
+  "Bump patch version and update configuration file"
+  [m]
+  (-> (load-config)
+      (merge m)
+      (core/bump-version :patch)))
+
+(defn bump-minor-version
+  "Bump minor version and update configuration file"
+  [m]
+  (-> (load-config)
+      (merge m)
+      (core/bump-version :minor)))
+
+(defn bump-major-version
+  "Bump major version and update configuration file"
+  [m]
+  (-> (load-config)
+      (merge m)
+      (core/bump-version :major)))
+
+(defn add-snapshot
+  "Add '-SNAPSHOT' to version number and update configuration file"
+  [m]
+  (-> (load-config)
+      (merge m)
+      (core/add-snapshot)))
+
+(defn remove-snapshot
+  "Remove '-SNAPSHOT' from version number and update configuration file"
+  [m]
+  (-> (load-config)
+      (merge m)
+      (core/remove-snapshot)))
 
 (defn help
   "Print this help"
