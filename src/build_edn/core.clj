@@ -12,7 +12,8 @@
    [malli.core :as m]
    [malli.error :as me]
    [malli.util :as mu]
-   [pogonos.core :as pg]))
+   [pogonos.core :as pg]
+   [rewrite-clj.zip :as z]))
 
 (def ^:private default-configs
   {:class-dir "target/classes"
@@ -256,3 +257,55 @@
           false)
       (do (println "OK")
           true))))
+
+(defn- replace-version!
+  [config-file version]
+  (-> (z/of-file config-file)
+      (z/find-value z/next :version)
+      (z/right)
+      (z/replace version)
+      (z/root-string)
+      (->> (spit config-file))))
+
+(defn- parse-and-validate-semantic-version
+  [{:as arg :keys [version]}]
+  (let [config (gen-config arg)
+        _ (validate-config! config)
+        parsed (be.ver/parse-semantic-version version)]
+    (if-not (and parsed (:config-file config))
+      (print-error (format "'%s' is not semantic versioning" version))
+      [config parsed])))
+
+(defn bump-version
+  [{:as arg :keys [config-file]} version-type]
+  (when-let [[config parsed] (parse-and-validate-semantic-version arg)]
+    (let [new-version (some-> parsed
+                              (be.ver/bump-version version-type)
+                              (be.ver/to-semantic-version))]
+      (if-not new-version
+        (print-error (format "Could not bump %s version: %s"
+                             (name version-type)
+                             (be.ver/to-semantic-version parsed)))
+        (do (replace-version! config-file new-version)
+            (set-gha-output config "version" new-version)
+            new-version)))))
+
+(defn add-snapshot
+  [{:as arg :keys [config-file]}]
+  (when-let [[config parsed] (parse-and-validate-semantic-version arg)]
+    (let [new-version (-> parsed
+                          (be.ver/add-snapshot)
+                          (be.ver/to-semantic-version))]
+      (replace-version! config-file new-version)
+      (set-gha-output config "version" new-version)
+      new-version)))
+
+(defn remove-snapshot
+  [{:as arg :keys [config-file]}]
+  (when-let [[config parsed] (parse-and-validate-semantic-version arg)]
+    (let [new-version (-> parsed
+                          (be.ver/remove-snapshot)
+                          (be.ver/to-semantic-version))]
+      (replace-version! config-file new-version)
+      (set-gha-output config "version" new-version)
+      new-version)))
