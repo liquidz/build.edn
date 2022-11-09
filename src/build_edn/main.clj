@@ -4,8 +4,12 @@
    [build-edn.core :as core]))
 
 (defn- load-config
-  []
-  (aero/read-config "build.edn"))
+  ([]
+   (load-config "build.edn"))
+  ([path]
+   (-> path
+       (aero/read-config)
+       (assoc :config-file path))))
 
 (defn pom
   "Generate pom.xml"
