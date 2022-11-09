@@ -1,7 +1,7 @@
 {:paths ["src"]
  :deps {org.clojure/clojure {:mvn/version "1.11.1"}
         org.clojure/data.xml {:mvn/version "0.2.0-alpha8"}
-        io.github.clojure/tools.build {:git/tag "v0.8.3" :git/sha "0d20256"}
+        io.github.clojure/tools.build {:git/tag "v0.8.4" :git/sha "8c3cd69"}
         rewrite-clj/rewrite-clj {:mvn/version "1.1.45"}
         metosin/malli {:mvn/version "0.8.9"}
         slipset/deps-deploy {:mvn/version "0.2.0"}
