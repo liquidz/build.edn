@@ -16,7 +16,7 @@
 (def ?uber-build-config
   [:map
    [:uber-file string?]
-   [:main symbol?]
+   [:main [:maybe symbol?]]
    [:skip-compiling-dirs {:optional true} [:or
                                            [:sequential string?]
                                            [:set string?]]]])

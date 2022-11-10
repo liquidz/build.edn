@@ -39,7 +39,9 @@
                                                      :skip-compiling-dirs []})))
     (t/is (true? (m/validate sut/?uber-build-config {:uber-file ""
                                                      :main 'foo
-                                                     :skip-compiling-dirs #{}}))))
+                                                     :skip-compiling-dirs #{}})))
+    (t/is (true? (m/validate sut/?uber-build-config {:uber-file ""
+                                                     :main nil}))))
 
   (t/testing "falsy"
     (t/is (false? (m/validate sut/?uber-build-config {})))
