@@ -40,3 +40,31 @@
   (with-redefs [core/lint identity]
     (t/is (= 'com.github.liquidz/build.edn
              (:lib (sut/lint {}))))))
+
+(t/deftest bump-patch-version-test
+  (with-redefs [core/bump-version list]
+    (let [[arg version-type] (sut/bump-patch-version {})]
+      (t/is (= 'com.github.liquidz/build.edn (:lib arg)))
+      (t/is (= :patch version-type)))))
+
+(t/deftest bump-minor-version-test
+  (with-redefs [core/bump-version list]
+    (let [[arg version-type] (sut/bump-minor-version {})]
+      (t/is (= 'com.github.liquidz/build.edn (:lib arg)))
+      (t/is (= :minor version-type)))))
+
+(t/deftest bump-major-version-test
+  (with-redefs [core/bump-version list]
+    (let [[arg version-type] (sut/bump-major-version {})]
+      (t/is (= 'com.github.liquidz/build.edn (:lib arg)))
+      (t/is (= :major version-type)))))
+
+(t/deftest add-snapshot-test
+  (with-redefs [core/add-snapshot identity]
+    (t/is (= 'com.github.liquidz/build.edn
+             (:lib (sut/add-snapshot {}))))))
+
+(t/deftest remove-snapshot-test
+  (with-redefs [core/remove-snapshot identity]
+    (t/is (= 'com.github.liquidz/build.edn
+             (:lib (sut/remove-snapshot {}))))))
