@@ -115,6 +115,23 @@ $ clojure -T:build add-snapshot
 $ clojure -T:build remove-snapshot
 ----
 
+=== Chain some functionarities
+
+If you'd like to use two or more functionarities at once, you can use `execute`.
+
+[source,bash]
+----
+# When you are using fixed semantic versioning
+$ clojure -T:build execute :fns '[bump-patch-version deploy]'
+
+# When you have Java source
+$ clojure -T:build execute :fns '[java-compile uberjar]'
+----
+
+`execute` function will run specified functions left to right.
+When specified functions contain some invalid strings, `execute` function will fail.
+
+
 == build.edn file format
 
 [cols="1,1,1,1,6a"]
