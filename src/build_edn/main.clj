@@ -101,6 +101,8 @@
   (let [metas (->> (ns-publics 'build-edn.main)
                    (vals)
                    (map meta)
-                   (sort-by #(:name %)))]
+                   (sort-by #(:name %)))
+        max-len (apply max (map (comp count str :name) metas))
+        format-str (format "%%-%ds - %%s" max-len)]
     (doseq [m metas]
-      (println (str (:name m) " - " (:doc m))))))
+      (println (format format-str  (:name m) (:doc m))))))
