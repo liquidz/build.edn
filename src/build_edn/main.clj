@@ -25,6 +25,13 @@
       (merge m)
       (core/jar)))
 
+(defn java-compile
+  "Compile Java sources"
+  [m]
+  (-> (load-config)
+      (merge m)
+      (core/java-compile)))
+
 (defn uberjar
   "Generate standalone JAR file"
   [m]

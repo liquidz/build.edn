@@ -120,6 +120,18 @@
     (set-gha-output config "jar" jar-file)
     jar-file))
 
+(defn java-compile
+  [arg]
+  (let [{:as config :keys [class-dir java-paths javac-opts]} (gen-config arg)
+        ?schema (mu/merge be.schema/?build-config
+                          be.schema/?java-compile-config)
+        _ (validate-config! ?schema config)
+        basis (get-basis arg)]
+    (b/javac {:src-dirs java-paths
+              :class-dir class-dir
+              :basis basis
+              :javac-opts javac-opts})))
+
 (defn uberjar
   [arg]
   (let [{:as config :keys [class-dir uber-file main skip-compiling-dirs]} (gen-config arg)
