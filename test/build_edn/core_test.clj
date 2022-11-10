@@ -465,4 +465,12 @@
                                        :url "baz"}}})))
       (t/is (false? (lint' {:pom {:no-clojure-itself? "invalid"}})))
       (t/is (false? (lint' {:pom {:scm "invalid"}})))
-      (t/is (false? (lint' {:pom {:scm {:invalid "foo"}}}))))))
+      (t/is (false? (lint' {:pom {:scm {:invalid "foo"}}}))))
+
+    (t/testing "java-compile"
+      (t/is (true? (lint' {:java-paths []})))
+      (t/is (true? (lint' {:java-paths []
+                           :javac-opts []})))
+      (t/is (false? (lint' {:java-paths [123]})))
+      (t/is (false? (lint' {:java-paths []
+                            :javac-opts [123]}))))))

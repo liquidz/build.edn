@@ -263,7 +263,10 @@
                   (mu/merge be.schema/?deploy-repository-build-config)
 
                   (contains? config :pom)
-                  (mu/merge be.schema/?pom-build-config))]
+                  (mu/merge be.schema/?pom-build-config)
+
+                  (contains? config :java-paths)
+                  (mu/merge be.schema/?java-compile-config))]
     (if-let [e (m/explain ?schema config)]
       (do (print-error (me/humanize e))
           false)
