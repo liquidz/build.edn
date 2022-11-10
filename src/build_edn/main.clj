@@ -102,6 +102,25 @@
       (merge m)
       (core/remove-snapshot)))
 
+(defn execute
+  "Execute one or more functions at once"
+  [{:as m :keys [fns]}]
+  (let [resolve' (fn [sym]
+                   (let [v (resolve sym)]
+                     (cond
+                       (= `execute sym)
+                       (println "Could not use 'execute' in 'execute'.")
+
+                       (nil? v)
+                       (println (format "Failed to reolve %s." sym))
+
+                       :else
+                       v)))
+        fns (map #(resolve' (symbol "build-edn.main" (str %))) fns)]
+    (when-not (some nil? fns)
+      (doseq [f fns]
+        (f m)))))
+
 (defn help
   "Print this help"
   [_]
