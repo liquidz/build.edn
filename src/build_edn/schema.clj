@@ -11,7 +11,15 @@
                                    [:set string?]]]
    [:class-dir {:optional true} string?]
    [:jar-file {:optional true} string?]
+   [:aliases {:optional true} [:sequential keyword?]]
    [:github-actions? {:optional true} boolean?]])
+
+(def ?java-compile-config
+  [:map
+   [:java-paths [:or
+                 [:sequential string?]
+                 [:set string?]]]
+   [:javac-opts {:optional true} [:sequential string?]]])
 
 (def ?uber-build-config
   [:map
