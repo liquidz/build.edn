@@ -168,6 +168,21 @@ When specified functions contain some invalid strings, `execute` function will f
 | "target/classes"
 |
 
+
+| java-paths
+| `sequential?`/`set?` of string
+|
+|
+| Required only for `java-compile`.
+
+
+| javac-opts
+| `sequential?` of string
+|
+|
+| Java compile options for `java-compile`.
+
+
 | jar-file
 | `string?`
 |
@@ -178,13 +193,13 @@ When specified functions contain some invalid strings, `execute` function will f
 | `string?`
 |
 | "target/{{lib}}-standalone.jar"
-| Required only for `uberjar`
+| Required only for `uberjar`.
 
 | main
 | `symbol?`
 |
 |
-| Required only for `uberjar`
+| Required only for `uberjar`.
 
 | skip-compiling-dirs
 | `sequential?`/`set?` of string
