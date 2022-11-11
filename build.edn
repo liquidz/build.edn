@@ -1,5 +1,5 @@
 {:lib com.github.liquidz/build.edn
- :version "0.8.{{git/commit-count}}"
+ :version "0.9.{{git/commit-count}}"
  :description "Make your Clojure library build process easy"
  :documents [{:file "CHANGELOG.adoc"
               :match "Unreleased"

@@ -25,6 +25,13 @@
       (merge m)
       (core/jar)))
 
+(defn java-compile
+  "Compile Java sources"
+  [m]
+  (-> (load-config)
+      (merge m)
+      (core/java-compile)))
+
 (defn uberjar
   "Generate standalone JAR file"
   [m]
@@ -95,12 +102,33 @@
       (merge m)
       (core/remove-snapshot)))
 
+(defn execute
+  "Execute one or more functions at once"
+  [{:as m :keys [fns]}]
+  (let [resolve' (fn [sym]
+                   (let [v (resolve sym)]
+                     (cond
+                       (= `execute sym)
+                       (println "Could not use 'execute' in 'execute'.")
+
+                       (nil? v)
+                       (println (format "Failed to reolve %s." sym))
+
+                       :else
+                       v)))
+        fns (map #(resolve' (symbol "build-edn.main" (str %))) fns)]
+    (when-not (some nil? fns)
+      (doseq [f fns]
+        (f m)))))
+
 (defn help
   "Print this help"
   [_]
   (let [metas (->> (ns-publics 'build-edn.main)
                    (vals)
                    (map meta)
-                   (sort-by #(:name %)))]
+                   (sort-by #(:name %)))
+        max-len (apply max (map (comp count str :name) metas))
+        format-str (format "%%-%ds - %%s" max-len)]
     (doseq [m metas]
-      (println (str (:name m) " - " (:doc m))))))
+      (println (format format-str  (:name m) (:doc m))))))

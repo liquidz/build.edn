@@ -151,6 +151,40 @@
     (t/is (thrown-with-msg? ExceptionInfo #"Invalid config"
             (sut/jar {})))))
 
+(t/deftest java-compile-test
+  (t/testing "normal"
+    (let [javac-arg (atom nil)]
+      (with-redefs [sut/get-basis (constantly {:foo 1})
+                    b/javac (fn [m] (reset! javac-arg m))]
+        (t/is (some? (sut/java-compile {:lib 'foo/bar
+                                        :version "1.2.{{git/commit-count}}"
+                                        :java-paths ["src-java"]}))))
+      (t/is (= {:src-dirs ["src-java"]
+                :class-dir "target/classes"
+                :basis {:foo 1}
+                :javac-opts nil}
+               @javac-arg))))
+
+  (t/testing "javac-opts"
+    (let [javac-arg (atom nil)]
+      (with-redefs [sut/get-basis (constantly {:foo 1})
+                    b/javac (fn [m] (reset! javac-arg m))]
+        (t/is (some? (sut/java-compile {:lib 'foo/bar
+                                        :version "1.2.{{git/commit-count}}"
+                                        :java-paths ["src-java"]
+                                        :javac-opts ["-Xlint:-options"]}))))
+      (t/is (= {:src-dirs ["src-java"]
+                :class-dir "target/classes"
+                :basis {:foo 1}
+                :javac-opts ["-Xlint:-options"]}
+               @javac-arg))))
+
+  (t/testing "validation error"
+    (t/is (thrown-with-msg? ExceptionInfo #"Invalid config"
+            (sut/java-compile {})))
+    (t/is (thrown-with-msg? ExceptionInfo #"Invalid config"
+            (sut/java-compile {:lib 'foo/bar :version "1"})))))
+
 (t/deftest uberjar-test
   (t/testing "normal"
     (let [copy-dir-arg (atom nil)
@@ -431,4 +465,12 @@
                                        :url "baz"}}})))
       (t/is (false? (lint' {:pom {:no-clojure-itself? "invalid"}})))
       (t/is (false? (lint' {:pom {:scm "invalid"}})))
-      (t/is (false? (lint' {:pom {:scm {:invalid "foo"}}}))))))
+      (t/is (false? (lint' {:pom {:scm {:invalid "foo"}}}))))
+
+    (t/testing "java-compile"
+      (t/is (true? (lint' {:java-paths []})))
+      (t/is (true? (lint' {:java-paths []
+                           :javac-opts []})))
+      (t/is (false? (lint' {:java-paths [123]})))
+      (t/is (false? (lint' {:java-paths []
+                            :javac-opts [123]}))))))

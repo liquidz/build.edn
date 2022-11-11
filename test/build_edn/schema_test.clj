@@ -32,6 +32,20 @@
                                                  :version ""
                                                  :description 123})))))
 
+(t/deftest java-compile-config-test
+  (t/testing "'truthy"
+    (t/is (true? (m/validate sut/?java-compile-config {:java-paths ["foo"]})))
+    (t/is (true? (m/validate sut/?java-compile-config {:java-paths #{"foo"}})))
+    (t/is (true? (m/validate sut/?java-compile-config {:java-paths []
+                                                       :javac-opts ["foo"]})))
+    (t/is (true? (m/validate sut/?java-compile-config {:java-paths []
+                                                       :javac-opts []}))))
+
+  (t/testing "falsy"
+    (t/is (false? (m/validate sut/?java-compile-config {:java-paths [123]})))
+    (t/is (false? (m/validate sut/?java-compile-config {:java-paths []
+                                                        :javac-opts [123]})))))
+
 (t/deftest uber-build-config-test
   (t/testing "truthy"
     (t/is (true? (m/validate sut/?uber-build-config {:uber-file ""
@@ -39,7 +53,9 @@
                                                      :skip-compiling-dirs []})))
     (t/is (true? (m/validate sut/?uber-build-config {:uber-file ""
                                                      :main 'foo
-                                                     :skip-compiling-dirs #{}}))))
+                                                     :skip-compiling-dirs #{}})))
+    (t/is (true? (m/validate sut/?uber-build-config {:uber-file ""
+                                                     :main nil}))))
 
   (t/testing "falsy"
     (t/is (false? (m/validate sut/?uber-build-config {})))
