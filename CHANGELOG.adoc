@@ -3,12 +3,8 @@ All notable changes to this project will be documented in this file. This change
 == Unreleased (dev)
 
 == 0.8.174 (2022-11-09)
-
-== 0.8.162 (2022-10-15)
 // {{{
 === Added
-* Added `keep-indent?` option for `documents` setting.
-** See link:./doc/format/documents.adoc[doc/format/documents.adoc] for more details.
 * Added functions for operating semantic versions
 ** `bump-major-version`
 ** `bump-minor-version`
@@ -17,10 +13,20 @@ All notable changes to this project will be documented in this file. This change
 ** `remove-snapshot`
 
 === Changed
-* Bumped data.xml to 0.2.0-alpha8.
 * Bumped malli to 0.9.2.
 * Bumped tools.build to 0.8.4.
 * Bumped kaocha to 1.71.1119.
+// }}}
+
+== 0.8.162 (2022-10-15)
+// {{{
+=== Added
+* Added `keep-indent?` option for `documents` setting.
+** See link:./doc/format/documents.adoc[doc/format/documents.adoc] for more details.
+
+=== Changed
+* Bumped kaocha to 1.70.1086.
+* Bumped data.xml to 0.2.0-alpha8.
 * https://github.com/liquidz/build.edn/issues/19[#19]: Updated not to use `::set-output` which is deprecated.
 ** https://github.blog/changelog/2022-10-11-github-actions-deprecating-save-state-and-set-output-commands/
 // }}}
