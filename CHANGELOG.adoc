@@ -1,6 +1,14 @@
 All notable changes to this project will be documented in this file. This change log follows the conventions of http://keepachangelog.com/[keepachangelog.com].
 
 == Unreleased (dev)
+// {{{
+=== Changed
+* Bumped tools.build to 0.9.3.
+* Bumped rewrite-clj to 1.1.46.
+* Bumped malli to 0.10.1.
+* Bumped pogonos to 0.2.1.
+* Bumped kaocha to 1.77.1236.
+// }}}
 
 == 0.9.188 (2022-11-11)
 // {{{
