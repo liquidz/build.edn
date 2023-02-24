@@ -41,13 +41,8 @@ jobs:
           git commit -m "Update for release" || exit 0
           git push
 
-      - uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: ncipollo/release-action@v1
         with:
-          tag_name: ${{ steps.tag.outputs.version }}
-          release_name: ${{ steps.tag.outputs.version }}
-          body: released
-          draft: false
-          prerelease: false
-
+          tag: ${{ steps.tag.outputs.version }}
+          skipIfReleaseExists: true
+          generateReleaseNotes: true
