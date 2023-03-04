@@ -7,7 +7,7 @@ All notable changes to this project will be documented in this file. This change
 === Changed
 * Bumped kaocha to 1.80.1274.
 * Changed to use tools.build on the Maven repository.
-* Changed release workflow to use [ncipollo/release-action](https://github.com/ncipollo/release-action).
+* Changed release workflow to use https://github.com/ncipollo/release-action[ncipollo/release-action].
 * Updated release workflow to deploy to clojars.
 // }}}
 
