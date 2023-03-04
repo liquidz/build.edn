@@ -328,6 +328,19 @@
         (t/is (= {dummy-githut-output "version=1.2.3\n"}
                  @output)))))
 
+  (t/testing "version fixed"
+    (let [output (atom {})]
+      (with-redefs [be.repo/repository-by-id dummy-repository-by-id
+                    sut/jar (constantly "./target/dummy.jar")
+                    deploy/deploy (constantly nil)
+                    sut/getenv dummy-getenv
+                    spit (fn [f contents & _]
+                           (swap! output assoc f contents))]
+        (t/is (= "9.8.7"
+                 (sut/deploy {:lib 'foo/bar :version "9.8.7" :github-actions? true})))
+        (t/is (= {dummy-githut-output "version=9.8.7\n"}
+                 @output)))))
+
   (t/testing "validation error"
     (with-redefs [be.repo/repository-by-id dummy-repository-by-id]
       (t/is (thrown-with-msg? ExceptionInfo #"Invalid config"
