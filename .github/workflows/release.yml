@@ -41,6 +41,12 @@ jobs:
           git commit -m "Update for release" || exit 0
           git push
 
+      - name: deploy to clojars
+        run: clojure -T:build deploy :version '"${{ steps.tag.outputs.version }}"'
+        env:
+          CLOJARS_PASSWORD: ${{secrets.CLOJARS_PASSWORD}}
+          CLOJARS_USERNAME: ${{secrets.CLOJARS_USERNAME}}
+
       - uses: ncipollo/release-action@v1
         with:
           tag: ${{ steps.tag.outputs.version }}
