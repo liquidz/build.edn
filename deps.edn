@@ -1,7 +1,7 @@
 {:paths ["src"]
  :deps {org.clojure/clojure {:mvn/version "1.11.1"}
         org.clojure/data.xml {:mvn/version "0.2.0-alpha8"}
-        io.github.clojure/tools.build {:git/tag "v0.9.3" :git/sha "e537cd1"}
+        io.github.clojure/tools.build {:mvn/version "0.9.3"}
         rewrite-clj/rewrite-clj {:mvn/version "1.1.46"}
         metosin/malli {:mvn/version "0.10.1"}
         slipset/deps-deploy {:mvn/version "0.2.0"}
@@ -9,7 +9,7 @@
         aero/aero {:mvn/version "1.1.6"}}
 
  :aliases {:dev {:extra-paths ["test"]
-                 :extra-deps {lambdaisland/kaocha {:mvn/version "1.77.1236"}}}
+                 :extra-deps {lambdaisland/kaocha {:mvn/version "1.80.1274"}}}
 
            :test {:main-opts ["-m" "kaocha.runner"]}
 

@@ -41,13 +41,14 @@ jobs:
           git commit -m "Update for release" || exit 0
           git push
 
-      - uses: actions/create-release@v1
+      - name: deploy to clojars
+        run: clojure -T:build deploy :version '"${{ steps.tag.outputs.version }}"'
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ steps.tag.outputs.version }}
-          release_name: ${{ steps.tag.outputs.version }}
-          body: released
-          draft: false
-          prerelease: false
+          CLOJARS_PASSWORD: ${{secrets.CLOJARS_PASSWORD}}
+          CLOJARS_USERNAME: ${{secrets.CLOJARS_USERNAME}}
 
+      - uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ steps.tag.outputs.version }}
+          skipIfReleaseExists: true
+          generateReleaseNotes: true
