@@ -38,6 +38,12 @@ jobs:
           CLOJARS_PASSWORD: ${{secrets.CLOJARS_PASSWORD}}
           CLOJARS_USERNAME: ${{secrets.CLOJARS_USERNAME}}
 
+      - uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ steps.deploy.outputs.version }}
+          skipIfReleaseExists: true
+          generateReleaseNotes: true
+
       - run: |
           clojure -T:build update-documents
           git diff
@@ -46,9 +52,3 @@ jobs:
           git add -A
           git commit -m "Update for release" || exit 0
           git push
-
-      - uses: ncipollo/release-action@v1
-        with:
-          tag: ${{ steps.deploy.outputs.version }}
-          skipIfReleaseExists: true
-          generateReleaseNotes: true
