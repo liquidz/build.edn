@@ -31,8 +31,14 @@ jobs:
       - name: Lint build.edn
         run: clojure -T:build lint
 
-      - id: tag
-        run: |
+      - id: deploy
+        name: deploy to clojars
+        run: clojure -T:build deploy
+        env:
+          CLOJARS_PASSWORD: ${{secrets.CLOJARS_PASSWORD}}
+          CLOJARS_USERNAME: ${{secrets.CLOJARS_USERNAME}}
+
+      - run: |
           clojure -T:build update-documents
           git diff
           git config --global user.email "github-actions@example.com"
@@ -41,14 +47,8 @@ jobs:
           git commit -m "Update for release" || exit 0
           git push
 
-      - name: deploy to clojars
-        run: clojure -T:build deploy :version '"${{ steps.tag.outputs.version }}"'
-        env:
-          CLOJARS_PASSWORD: ${{secrets.CLOJARS_PASSWORD}}
-          CLOJARS_USERNAME: ${{secrets.CLOJARS_USERNAME}}
-
       - uses: ncipollo/release-action@v1
         with:
-          tag: ${{ steps.tag.outputs.version }}
+          tag: ${{ steps.deploy.outputs.version }}
           skipIfReleaseExists: true
           generateReleaseNotes: true
