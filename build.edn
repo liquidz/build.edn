@@ -8,5 +8,11 @@
              {:file "README.adoc"
               :match ":deps.+com\\.github\\.liquidz/build\\.edn"
               :action :replace
-              :text " {:build {:deps {com.github.liquidz/build.edn {:git/tag \"{{version}}\" :git/sha \"{{git/head-short-sha}}\"}}"}]
+              :keep-indent? true
+              :text "{:build {:deps {com.github.liquidz/build.edn {:mvn/version \"{{version}}\"}}"}
+             {:file "README.adoc"
+              :match ":git/tag "
+              :action :replace
+              :keep-indent? true
+              :text ";; :git/tag \"{{version}}\" :git/sha \"{{git/head-short-sha}}\""}]
  :github-actions? true}
