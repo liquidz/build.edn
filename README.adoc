@@ -275,6 +275,7 @@ Of course, build.edn itself is using build.edn for releasing.
 * https://github.com/liquidz/testdoc[liquidz/testdoc]
 * https://github.com/liquidz/rewrite-indented[liquidz/rewrite-indented]
 * https://github.com/liquidz/dad[liquidz/dad]
+* https://github.com/sunng87/diehard[sunng87/diehard]
 
 == License
 
