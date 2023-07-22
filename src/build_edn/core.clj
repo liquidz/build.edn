@@ -13,7 +13,8 @@
    [malli.error :as me]
    [malli.util :as mu]
    [pogonos.core :as pg]
-   [rewrite-clj.zip :as z]))
+   [rewrite-clj.zip :as z])
+  (:import (java.util.regex Pattern)))
 
 (def ^:private default-configs
   {:class-dir "target/classes"
@@ -209,8 +210,11 @@
                           be.schema/?documents-build-config)
         _ (validate-config! ?schema config)
         render-data (generate-render-data config)]
-    (doseq [{:keys [file match action text keep-indent?]} documents
-            :let [regexp (when (string? match)
+    (doseq [{:keys [file match match-exactly action text keep-indent?]} documents
+            :let [match (if (string? match-exactly)
+                            (Pattern/quote match-exactly)
+                            match)
+                  regexp (when (string? match)
                            (re-pattern match))
                   text (pg/render-string text render-data)]]
       (if (= :create action)

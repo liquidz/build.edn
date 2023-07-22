@@ -39,6 +39,12 @@
     [:text string?]]
    [:map {:closed true}
     [:file string?]
+    [:match-exactly string?]
+    [:action [:enum :append-before :replace :append-after]]
+    [:keep-indent? {:optional true} boolean?]
+    [:text string?]]
+   [:map {:closed true}
+    [:file string?]
     [:action [:enum :create]]
     [:text string?]]])
 

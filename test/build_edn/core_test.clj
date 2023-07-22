@@ -399,6 +399,20 @@
         (t/is (= {"foo.txt" "foo\nbar\nbaz\n"}
                  @updated)))))
 
+  (t/testing "match-exactly"
+    (let [updated (atom {})]
+      (with-redefs [slurp (constantly "a_b_c\na.b.c\n")
+                    spit (fn [f content]
+                           (swap! updated assoc f content))]
+        (sut/update-documents {:lib 'foo/bar
+                               :version "1.2.{{commit-count}}"
+                               :documents [{:file "foo.txt"
+                                            :match-exactly "a.b.c"
+                                            :action :replace
+                                            :text "baz"}]})
+        (t/is (= {"foo.txt" "a_b_c\nbaz\n"}
+                 @updated)))))
+
   (t/testing "keep-indent?"
     (let [updated (atom {})]
       (with-redefs [slurp (constantly "foo\n  bar")
