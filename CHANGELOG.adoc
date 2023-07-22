@@ -1,6 +1,7 @@
 All notable changes to this project will be documented in this file. This change log follows the conventions of http://keepachangelog.com/[keepachangelog.com].
 
 == Unreleased (dev)
+* Added support for `:match-exactly` in `:documents`.
 
 == 0.9.216 (2023-05-03)
 // {{{
