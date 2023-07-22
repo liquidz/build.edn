@@ -15,12 +15,12 @@
 | `string?`
 | Yes for actions excepting `create`
 | Regexp for matching base line in the `:file`
-|
+
 | match-exactly
 | `string?`
 | Can be used as an alternative to `match`.
 | Plain string for matching base line in the `:file`
-|
+
 | action
 | `:append-before`, `:replace`, `:append-after` or `:create`
 | Yes
