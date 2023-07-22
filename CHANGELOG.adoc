@@ -1,6 +1,8 @@
 All notable changes to this project will be documented in this file. This change log follows the conventions of http://keepachangelog.com/[keepachangelog.com].
 
 == Unreleased (dev)
+
+== 0.10.227 (2023-07-22)
 // {{{
 === Added
 * https://github.com/liquidz/build.edn/pull/29[#29]: Added support for `:match-exactly` in `:documents`.
