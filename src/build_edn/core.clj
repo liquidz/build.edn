@@ -96,13 +96,11 @@
     (-> config
         (select-keys [:lib :version :class-dir :scm])
         (assoc :basis basis
-               :src-dirs (get-src-dirs config basis))
+               :src-dirs (get-src-dirs config basis)
+               :pom-data (cond-> []
+                           description
+                           (conj [:description description])))
         (b/write-pom))
-
-    (when description
-      (-> (slurp pom-path)
-          (be.pom/add-description description)
-          (->> (spit pom-path))))
 
     (set-gha-output config "pom" pom-path)
     pom-path))
