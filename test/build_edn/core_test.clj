@@ -67,7 +67,8 @@
                 :scm {:connection "scm:git:git://github.com/liquidz/build.edn.git"
                       :developerConnection "scm:git:ssh://git@github.com/liquidz/build.edn.git"
                       :url "https://github.com/liquidz/build.edn"
-                      :tag "1.2.3"}}
+                      :tag "1.2.3"}
+                :pom-data []}
                (dissoc @write-pom-arg :basis)))
 
       (t/is (contains? (get-in @write-pom-arg [:basis :libs])
@@ -101,6 +102,15 @@
           (t/is (seq ret))
           (t/is (= {dummy-githut-output (format "pom=%s\n" ret)}
                    @output))))))
+
+  (t/testing "description"
+    (let [write-pom-arg (atom nil)]
+      (with-redefs [b/write-pom (fn [m] (reset! write-pom-arg m))]
+        (t/is (some? (sut/pom {:lib 'foo/bar
+                               :version "1.2.3"
+                               :description "hello world"}))))
+      (t/is (= [[:description "hello world"]]
+               (:pom-data @write-pom-arg)))))
 
   (t/testing "validation error"
     (t/is (thrown-with-msg? ExceptionInfo #"Invalid config"
