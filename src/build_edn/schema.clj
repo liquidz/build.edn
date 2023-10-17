@@ -1,5 +1,10 @@
 (ns build-edn.schema)
 
+(def ?license
+  [:map
+   [:name string?]
+   [:url string?]])
+
 (def ?build-config
   [:map
    [:config-file {:optional true} string?] ; The file path containing build configuration
@@ -12,7 +17,8 @@
    [:class-dir {:optional true} string?]
    [:jar-file {:optional true} string?]
    [:aliases {:optional true} [:sequential keyword?]]
-   [:github-actions? {:optional true} boolean?]])
+   [:github-actions? {:optional true} boolean?]
+   [:licenses {:optional true} [:sequential ?license]]])
 
 (def ?java-compile-config
   [:map

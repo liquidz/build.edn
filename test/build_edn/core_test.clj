@@ -112,6 +112,22 @@
       (t/is (= [[:description "hello world"]]
                (:pom-data @write-pom-arg)))))
 
+  (t/testing "licenses"
+    (let [write-pom-arg (atom nil)]
+      (with-redefs [b/write-pom (fn [m] (reset! write-pom-arg m))]
+        (t/is (some? (sut/pom {:lib 'foo/bar
+                               :version "1.2.3"
+                               :licenses [{:name "dummy license1" :url "https://dummy1.example.com"}
+                                          {:name "dummy license2" :url "https://dummy2.example.com"}]}))))
+      (t/is (= [[:licenses
+                 [:license
+                  [:name "dummy license1"]
+                  [:url "https://dummy1.example.com"]]
+                 [:license
+                  [:name "dummy license2"]
+                  [:url "https://dummy2.example.com"]]]]
+               (:pom-data @write-pom-arg)))))
+
   (t/testing "validation error"
     (t/is (thrown-with-msg? ExceptionInfo #"Invalid config"
             (sut/pom {})))))
