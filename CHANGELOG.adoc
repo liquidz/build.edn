@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file. This change
 == Unreleased (dev)
 // {{{
 === Added
-* https://github.com/liquidz/build.edn/pull/31[#31]: Added `:licenses` option to generate `licences` tag in pom.xml.
+* https://github.com/liquidz/build.edn/pull/31[#31]: Added `:licenses` option to generate `licenses` tag in pom.xml.
 ** See link:./doc/format/licenses.adoc[doc/format/licenses.adoc] for more details.
 
 === Changed
