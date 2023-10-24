@@ -1,0 +1,30 @@
+= licenses
+
+`:licenses` key in `build.edn` file shoud be a sequence of the following map.
+
+[cols="1,1,1,6a"]
+|===
+| name | type | required? | description
+
+| name
+| `string?`
+| Yes
+| License name
+
+| url
+| `string?`
+| Yes
+| License URL
+
+|===
+
+== Example
+
+[source,clojure]
+----
+{:lib foo/bar
+ :version "0.1.0"
+ :description "Your great library"
+ :licenses [{:name "Eclipse Public License - v 2.0"
+             :url "https://www.eclipse.org/legal/epl-2.0/"}]}
+----

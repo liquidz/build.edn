@@ -160,6 +160,13 @@ When specified functions contain some invalid strings, `execute` function will f
 |
 | You can add `description` tag to pom.xml.
 
+| licenses
+| `sequential?`
+|
+|
+| You can add `licenses` tag to pom.xml.
+See link:./doc/format/licenses.adoc[doc/format/licenses.adoc] for more details.
+
 | source-dirs
 | `sequential?`/`set?` of string
 |

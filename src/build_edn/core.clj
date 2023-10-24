@@ -85,7 +85,7 @@
 
 (defn pom
   [arg]
-  (let [{:as config :keys [description pom]} (gen-config arg)
+  (let [{:as config :keys [description licenses pom]} (gen-config arg)
         ?schema (mu/merge be.schema/?build-config
                           be.schema/?pom-build-config)
         _ (validate-config! ?schema config)
@@ -96,13 +96,18 @@
     (-> config
         (select-keys [:lib :version :class-dir :scm])
         (assoc :basis basis
-               :src-dirs (get-src-dirs config basis))
+               :src-dirs (get-src-dirs config basis)
+               :pom-data (cond-> []
+                           description
+                           (conj [:description description])
+                           licenses
+                           (conj (vec (cons :licenses
+                                            (map (fn [{:keys [name url]}]
+                                                   [:license
+                                                    [:name name]
+                                                    [:url url]])
+                                                 licenses))))))
         (b/write-pom))
-
-    (when description
-      (-> (slurp pom-path)
-          (be.pom/add-description description)
-          (->> (spit pom-path))))
 
     (set-gha-output config "pom" pom-path)
     pom-path))
