@@ -1,5 +1,5 @@
 {:lib com.github.liquidz/build.edn
- :version "0.10.{{git/commit-count}}"
+ :version "0.11.{{git/commit-count}}"
  :description "Make your Clojure library build process easy"
  :licenses [{:name "Eclipse Public License - v 2.0"
              :url "https://www.eclipse.org/legal/epl-2.0/"}]
