@@ -1,8 +1,8 @@
 (ns build-edn.repository
   (:require
    [clojure.java.io :as io]
-   [clojure.tools.deps.alpha :as deps]
-   [clojure.tools.deps.alpha.util.maven :as deps.u.maven]
+   [clojure.tools.deps :as deps]
+   [clojure.tools.deps.util.maven :as deps.u.maven]
    [deps-deploy.maven-settings :as dd.maven-settings])
   (:import
    org.apache.maven.settings.Server))
