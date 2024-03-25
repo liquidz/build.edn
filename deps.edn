@@ -4,7 +4,7 @@
         io.github.clojure/tools.build {:mvn/version "0.9.6"}
         rewrite-clj/rewrite-clj {:mvn/version "1.1.47"}
         metosin/malli {:mvn/version "0.13.0"}
-        slipset/deps-deploy {:mvn/version "0.2.1"}
+        slipset/deps-deploy {:mvn/version "0.2.2"}
         pogonos/pogonos {:mvn/version "0.2.1"}
         aero/aero {:mvn/version "1.1.6"}}
 
