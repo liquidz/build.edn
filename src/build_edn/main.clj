@@ -2,7 +2,7 @@
   (:require
    [aero.core :as aero]
    [build-edn.core :as core]
-   [clojure.java.io :as jio]))
+   [clojure.java.io :as io]))
 
 (defn- load-config
   ([]
