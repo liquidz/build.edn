@@ -8,7 +8,7 @@
   ([]
    (load-config "build.edn"))
   ([path]
-   (if (.exists (jio/file path))
+   (if (.exists (io/file path))
      (-> path
          (aero/read-config)
          (assoc :config-file path))
