@@ -1,15 +1,18 @@
 (ns build-edn.main
   (:require
    [aero.core :as aero]
-   [build-edn.core :as core]))
+   [build-edn.core :as core]
+   [clojure.java.io :as io]))
 
 (defn- load-config
   ([]
    (load-config "build.edn"))
   ([path]
-   (-> path
-       (aero/read-config)
-       (assoc :config-file path))))
+   (if (.exists (io/file path))
+     (-> path
+         (aero/read-config)
+         (assoc :config-file path))
+     {})))
 
 (defn pom
   "Generate pom.xml"

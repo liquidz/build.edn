@@ -2,7 +2,7 @@
   (:require
    [build-edn.repository :as sut]
    [clojure.test :as t]
-   [clojure.tools.deps.alpha.util.maven :as deps.u.maven]
+   [clojure.tools.deps.util.maven :as deps.u.maven]
    [deps-deploy.maven-settings :as dd.maven-settings])
   (:import
    (org.apache.maven.settings
