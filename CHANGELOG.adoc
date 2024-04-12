@@ -1,6 +1,17 @@
 All notable changes to this project will be documented in this file. This change log follows the conventions of http://keepachangelog.com/[keepachangelog.com].
 
 == Unreleased (dev)
+// {{{
+=== Changed
+* https://github.com/liquidz/build.edn/pull/33[#33]: Changed not to force a build.edn file.
+* Bumped clojure to 1.11.2.
+* Bumped deps-deploy to 0.2.2.
+* Bumped data.xml to 0.2.0-alpha9.
+* Bumped tools.build to 0.10.0.
+* Bumped malli to 0.15.0.
+* Bumped kaocha to 1.88.1376.
+* Bumped outdated actions.
+// }}}
 
 == 0.11.241 (2023-10-24)
 // {{{
