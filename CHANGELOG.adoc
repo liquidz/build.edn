@@ -1,6 +1,8 @@
 All notable changes to this project will be documented in this file. This change log follows the conventions of http://keepachangelog.com/[keepachangelog.com].
 
 == Unreleased (dev)
+
+== 0.11.257 (2024-04-12)
 // {{{
 === Changed
 * https://github.com/liquidz/build.edn/pull/33[#33]: Changed not to force a build.edn file.
