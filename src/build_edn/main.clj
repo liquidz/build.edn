@@ -35,6 +35,11 @@
       (merge m)
       (core/java-compile)))
 
+(defn javac
+  "Compile Java sources"
+  [m]
+  (java-compile m))
+
 (defn uberjar
   "Generate standalone JAR file"
   [m]
