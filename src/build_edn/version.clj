@@ -44,10 +44,17 @@
    (bump-version parsed-version :patch))
   ([parsed-version :- ?parsed-version
     version-type :- ?version-type]
-   (let [target-key (keyword "version" (name version-type))]
+   (let [target-key (keyword "version" (name version-type))
+         order [:version/major :version/minor :version/patch]
+         reset-keys (->> order (drop-while #(not= target-key %)) rest)]
      (when-let [new-version (some-> (get parsed-version target-key)
                                     parse-long inc str)]
-       (assoc parsed-version target-key new-version)))))
+       (reduce (fn [acc key]
+                 (if (= "{{git/commit-count}}" (get acc key))
+                   acc
+                   (assoc acc key "0")))
+               (assoc parsed-version target-key new-version)
+               reset-keys)))))
 
 (mx/defn add-snapshot
   :- ?parsed-version
