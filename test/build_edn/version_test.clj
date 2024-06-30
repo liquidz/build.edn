@@ -48,11 +48,11 @@
 (t/deftest bump-version-test
   (let [v (sut/parse-semantic-version "1.2.3")]
     (t/testing "major"
-      (t/is (= "2.2.3"
+      (t/is (= "2.0.0"
                (-> (sut/bump-version v :major)
                    (sut/to-semantic-version)))))
     (t/testing "minor"
-      (t/is (= "1.3.3"
+      (t/is (= "1.3.0"
                (-> (sut/bump-version v :minor)
                    (sut/to-semantic-version)))))
     (t/testing "patch"

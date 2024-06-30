@@ -1,6 +1,10 @@
 All notable changes to this project will be documented in this file. This change log follows the conventions of http://keepachangelog.com/[keepachangelog.com].
 
 == Unreleased (dev)
+// {{{
+=== Fixed
+* https://github.com/liquidz/build.edn/issues/38[#38]: Fixed bumping of version so it resets minor or patch to 0 when bumping major or minor, as per semver.
+// }}}
 
 == 0.11.257 (2024-04-12)
 // {{{
