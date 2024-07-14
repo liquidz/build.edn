@@ -2,6 +2,12 @@ All notable changes to this project will be documented in this file. This change
 
 == Unreleased (dev)
 // {{{
+=== Changed
+* Bumped clojure to 1.11.3.
+* Bumped tools.build to 0.10.5.
+* Bumped malli to 0.16.2.
+* Bumped kaocha to 1.91.1392.
+
 === Fixed
 * https://github.com/liquidz/build.edn/issues/38[#38]: Fixed bumping of version so it resets minor or patch to 0 when bumping major or minor, as per semver.
 // }}}
