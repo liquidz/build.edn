@@ -9,7 +9,7 @@
         aero/aero {:mvn/version "1.1.6"}}
 
  :aliases {:dev {:extra-paths ["test"]
-                 :extra-deps {lambdaisland/kaocha {:mvn/version "1.88.1376"}}}
+                 :extra-deps {lambdaisland/kaocha {:mvn/version "1.91.1392"}}}
 
            :test {:main-opts ["-m" "kaocha.runner"]}
 
